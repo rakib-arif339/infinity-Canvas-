@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinity Canvas Gallery — Admin & Carousel View</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* ---- Night-Mode Initial Loading Interface ---- */
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: #000000;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.6s ease, visibility 0.6s;
+        }
+
+        /* Loading Animation Styles (From Uiverse.io by JaydipPrajapati1910) */
+        .loader-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 90px;
+            height: 51px;
+        }
+
+        .loader-container div {
+            position: absolute;
+            width: 90px;
+            height: 51px;
+        }
+
+        .loader-container div:nth-of-type(2) {
+            transform: rotate(60deg);
+        }
+
+        .loader-container div:nth-of-type(3) {
+            transform: rotate(-60deg);
+        }
+
+        .loader-container div div {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .loader-container div div span {
+            position: absolute;
+            width: 4px;
+            height: 0%;
+            background: #053146;
+            z-index: 999999;
+        }
+
+        .h1 { left: 0; animation: load1 7.2s ease infinite; }
+        .h2 { right: 0; animation: load2 7.2s ease .6s infinite; }
+        .h3 { right: 0; animation: load3 7.2s ease 1.2s infinite; }
+        .h4 { right: 0; animation: load4 7.2s ease 1.8s infinite; }
+        .h5 { left: 0; animation: load5 7.2s ease 2.4s infinite; }
+        .h6 { left: 0; animation: load6 7.2s ease 3s infinite; }
+
+        @keyframes load1 {
+            0% { bottom: 0; height: 0; }
+            6.944444444% { bottom: 0; height: 100%; }
+            50% { top: 0; height: 100%; }
+            59.944444433% { top: 0; height: 0; }
+        }
+        @keyframes load2 {
+            0% { top: 0; height: 0; }
+            6.944444444% { top: 0; height: 100%; }
+            50% { bottom: 0; height: 100%; }
+            59.944444433% { bottom: 0; height: 0; }
+        }
+        @keyframes load3 {
+            0% { top: 0; height: 0; }
+            6.944444444% { top: 0; height: 100%; }
+            50% { bottom: 0; height: 100%; }
+            59.94444443% { bottom: 0; height: 0; }
+        }
+        @keyframes load4 {
+            0% { top: 0; height: 0; }
+            6.944444444% { top: 0; height: 100%; }
+            50% { bottom: 0; height: 100%; }
+            59.94444443% { bottom: 0; height: 0; }
+        }
+        @keyframes load5 {
+            0% { bottom: 0; height: 0; }
+            6.944444444% { bottom: 0; height: 100%; }
+            50% { top: 0; height: 100%; }
+            59.94444443% { top: 0; height: 0; }
+        }
+        @keyframes load6 {
+            0% { bottom: 0; height: 0; }
+            6.944444444% { bottom: 0; height: 100%; }
+            50% { top: 0; height: 100%; }
+            59.94444443% { top: 0; height: 0; }
+        }
+
+        /* Typography Sub-label under Animation */
+        .loading-text-label {
+            margin-top: 64px;
+            color: #e2e8f0;
+            font-size: 13px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            font-weight: 900; /* Heavy Black weight styling profile */
+            text-align: center;
+            user-select: none;
+        }
+
+        /* ---- Infinite Grid Workspace Viewport ---- */
+        #gallery-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-width: 600px;
+            min-height: 600px;
+            overflow: hidden;
+            background-color: #000000;
+            touch-action: none;
+            user-select: none;
+            cursor: grab;
+            z-index: 1;
+        }
+
+        #gallery-container:active {
+            cursor: grabbing;
+        }
+
+        #gallery-scene {
+            position: absolute;
+            inset: 0;
+        }
+
+        /* ---- Hamburger Component Styling (From Uiverse.io by tarantino421) ---- */
+        .buttons__burger {
+          --size: 2.2rem;
+          --clr: #fff; 
+          width: var(--size);
+          height: calc(0.7 * var(--size));
+          cursor: pointer;
+          position: fixed;
+          top: 24px;
+          left: 24px;
+          display: block;
+          z-index: 30;
+        }
+
+        .buttons__burger #burger {
+          display: none;
+          width: 100%;
+          height: 100%;
+        }
+
+        .buttons__burger span {
+          display: block;
+          position: absolute;
+          width: 100%;
+          border-radius: 0.5rem;
+          border: 3px solid var(--clr);
+          background-color: var(--clr);
+          transition: 0.15s ease-in-out;
+        }
+
+        .buttons__burger span:nth-of-type(1) {
+          top: 0;
+          right: 0;
+          transform-origin: right center;
+        }
+
+        .buttons__burger span:nth-of-type(2) {
+          top: 50%;
+          transform: translateY(-50%);
+        }
+
+        .buttons__burger span:nth-of-type(3) {
+          top: 100%;
+          right: 0;
+          transform-origin: right center;
+          transform: translateY(-100%);
+        }
+
+        .buttons__burger #burger:checked ~ span:nth-of-type(1) {
+          transform: translateY(-30%) rotate(40deg);
+          width: 50%;
+          top: 50%;
+        }
+
+        .buttons__burger #burger:checked ~ span:nth-of-type(3) {
+          transform: translateY(-70%) rotate(-40deg);
+          width: 50%;
+          top: 50%;
+        }
+
+        /* ---- Side Navigation Drawer Wrapper Container ---- */
+        #side-drawer {
+            position: fixed;
+            top: 0;
+            left: -340px;
+            width: 340px;
+            height: 100%;
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 84px 24px 24px 24px;
+            z-index: 20;
+            color: #fff;
+            box-shadow: 8px 0 32px rgba(0, 0, 0, 0.6);
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            overflow-y: auto;
+        }
+
+        #side-drawer.open {
+            transform: translateX(340px);
+        }
+
+        .menu-placeholder-section {
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .menu-placeholder-section h4 {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .menu-placeholder-section p {
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        /* ---- Admin Dashboard Styles Inside Drawer ---- */
+        #admin-panel {
+            width: 100%;
+            color: #fff;
+        }
+
+        #admin-panel h3 {
+            font-size: 16px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .admin-input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .admin-input-group input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .admin-input-group input:focus {
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .admin-btn {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .admin-btn:hover {
+            opacity: 0.9;
+        }
+
+        #admin-list {
+            max-height: 240px;
+            overflow-y: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 12px;
+        }
+
+        .admin-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.03);
+            padding: 6px 8px;
+            border-radius: 4px;
+        }
+
+        .admin-item img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .admin-item span {
+            flex: 1;
+            font-size: 11px;
+            color: #aaa;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ff4a4a;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .delete-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* ---- Blur Carousel Lightbox Overlays ---- */
+        #carousel-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        #carousel-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        #carousel-root {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-width: 200px;
+            min-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1100px;
+            outline: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #carousel-frame {
+            position: relative;
+            width: 480px;
+            height: 500px;
+            overflow: hidden;
+            background: #0c0c0c;
+            transform-style: preserve-3d;
+            transform-origin: center center;
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .carousel-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            opacity: 0;
+            transition: opacity 0.2s linear;
+            pointer-events: none;
+        }
+
+        .carousel-img.active {
+            opacity: 1;
+        }
+
+        #carousel-gradient {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 42%);
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .blur-overlay {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 42%;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .blur-left {
+            left: 0;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            mask-image: linear-gradient(to right, #000 0%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to right, #000 0%, transparent 100%);
+        }
+
+        .blur-right {
+            right: 0;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            mask-image: linear-gradient(to left, #000 0%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to left, #000 0%, transparent 100%);
+        }
+
+        .carousel-arrow {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            z-index: 5;
+            cursor: pointer;
+            color: rgba(255,255,255,0.6);
+            transition: color 0.25s ease, transform 0.2s ease;
+            touch-action: none;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .arrow-prev { left: 14px; }
+        .arrow-next { right: 14px; }
+
+        #close-carousel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            font-size: 32px;
+            cursor: pointer;
+            z-index: 110;
+            transition: color 0.2s;
+        }
+
+        #close-carousel:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ---- Night-Mode Initial Loading Interface Window ---- -->
+    <div id="loading-overlay">
+        <section class="loader-container">
+            <div>
+                <div>
+                    <span class="one h6"></span>
+                    <span class="two h3"></span>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <span class="one h1"></span>
+                    <span class="two h4"></span>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <span class="one h5"></span>
+                    <span class="two h2"></span>
+                </div>
+            </div>
+        </section>
+        <div class="loading-text-label">Infinity Canvas Loading ...</div>
+    </div>
+
+    <!-- ---- Hamburger UI Switch Section Component ---- -->
+    <label class="buttons__burger" for="burger">
+        <input type="checkbox" id="burger">
+        <span></span>
+        <span></span>
+        <span></span>
+    </label>
+
+    <!-- ---- Navigation Panel Side Drawer Container ---- -->
+    <div id="side-drawer">
+        <div class="menu-placeholder-section">
+            <h4>Navigation Sections</h4>
+            <p>Additional sections will be added here later.</p>
+        </div>
+
+        <!-- ---- Admin Dashboard Sections ---- -->
+        <div id="admin-panel">
+            <div id="admin-login-box">
+                <h3>Admin Authentication</h3>
+                <div class="admin-input-group">
+                    <input type="password" id="admin-pass-input" placeholder="Enter dashboard password...">
+                    <button class="admin-btn" id="admin-login-btn">Login</button>
+                </div>
+                <p id="admin-login-error" style="color: #ff4a4a; font-size: 12px; margin-top: -8px; display: none;">Invalid credentials sequence.</p>
+            </div>
+
+            <div id="admin-management-box" style="display: none;">
+                <h3>Gallery Administration</h3>
+                <div class="admin-input-group">
+                    <input type="text" id="img-url-input" placeholder="Paste URL or Drive share link...">
+                    <button class="admin-btn" id="add-img-btn">Add</button>
+                </div>
+                <div id="admin-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ---- Infinite Viewport Container ---- -->
+    <div id="gallery-container">
+        <div id="gallery-scene"></div>
+    </div>
+
+    <!-- ---- Blur Carousel Lightbox Overlays ---- -->
+    <div id="carousel-overlay">
+        <button id="close-carousel">&times;</button>
+        <div id="carousel-root">
+            <div id="carousel-frame">
+                <div id="carousel-img-stack"></div>
+                <div id="carousel-gradient"></div>
+                <div class="blur-overlay blur-left" id="blur-layer-prev"></div>
+                <div class="blur-overlay blur-right" id="blur-layer-next"></div>
+                
+                <div class="carousel-arrow arrow-prev" id="arrow-element-prev" role="button" aria-label="Previous slide">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </div>
+                <div class="carousel-arrow arrow-next" id="arrow-element-next" role="button" aria-label="Next slide">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---- System Password Configuration Access Key ----
+            const ACCESS_PASSWORD = "admin123";
+
+            // ---- Persistent LocalStorage Sync Infrastructure ----
+            const STORAGE_KEY = "infinity_canvas_image_registry";
+            const BACKING_ASSETS = [
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/612d1402-0ad9-4135-3bbc-a30a6a252b00/w=800", alt: "Card 1" },
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/6d2ad64a-102d-4eab-0efe-31479e34b500/w=800", alt: "Card 2" },
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/be854dd1-37aa-4fc7-f569-fdb948109300/w=800", alt: "Card 3" },
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/51984031-9176-484b-f5e0-4af9a8e9ed00/w=800", alt: "Card 4" },
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/34ce1842-4b7a-4d52-0302-38582c341700/w=800", alt: "Card 5" },
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/88369c6d-00cc-4ac9-74ca-0f0965e06300/w=800", alt: "Card 6" },
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/aeaa0756-9647-4f6c-d900-204bd25e4a00/w=800", alt: "Card 7" },
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/316d1761-fd79-4ca9-b8d4-f2bb20521a00/w=800", alt: "Card 8" }
+            ];
+
+            let stored = localStorage.getItem(STORAGE_KEY);
+            let DEFAULT_IMAGES = stored ? JSON.parse(stored) : BACKING_ASSETS;
+
+            function saveState() {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_IMAGES));
+            }
+
+            // ---- Dismiss Loading Interface After Delay ----
+            window.addEventListener("load", () => {
+                setTimeout(() => {
+                    const loader = document.getElementById("loading-overlay");
+                    loader.style.opacity = "0";
+                    setTimeout(() => {
+                        loader.style.visibility = "hidden";
+                    }, 600);
+                }, 2500); // 2.5 seconds showcase delay
+            });
+
+            // ---- Google Drive Stream Link Converter ----
+            function parseImageInputUrl(url) {
+                url = url.trim();
+                if (url.includes("drive.google.com")) {
+                    const dMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+                    if (dMatch && dMatch[1]) {
+                        return `https://lh3.googleusercontent.com/d/${dMatch[1]}`;
+                    }
+                    const idMatch = url.match(/id=([a-zA-Z0-9_-]+)/);
+                    if (idMatch && idMatch[1]) {
+                        return `https://lh3.googleusercontent.com/d/${idMatch[1]}`;
+                    }
+                }
+                return url;
+            }
+
+            const config = {
+                density: 5,
+                imageWidth: 150,
+                imageHeight: 150,
+                rounded: 3,
+                dragSpeed: 15,
+                driftAmount: 15,
+                friction: 4
+            };
+
+            const safeDensity = Math.max(1, Math.min(15, Math.floor(config.density)));
+            const safeImageWidth = Math.max(8, Math.min(4000, config.imageWidth));
+            const safeImageHeight = Math.max(8, Math.min(4000, config.imageHeight));
+            const safeRounded = Math.max(0, Math.min(20, config.rounded));
+            const safeDragSpeed = Math.max(0.1, Math.min(5, config.dragSpeed / 20));
+            const safeDriftAmount = Math.max(0, Math.min(20, config.driftAmount));
+            const safeFriction = 0.94; 
+
+            const PX_PER_UNIT = 6;
+            const CELL_SIZE = 110;
+            const MAX_RANGE = 20;
+            const SCALE_MIN = 0.45;
+            const SCALE_MAX = 1.6;
+
+            const subN = Math.max(1, Math.ceil(Math.sqrt(safeDensity)));
+            const subSize = CELL_SIZE / subN;
+            const SUBCELL_INNER_PAD = 0.1;
+            const effectivePerCell = Math.min(safeDensity, subN * subN);
+
+            let targetX = 0, targetY = 0;
+            let camX = 0, camY = 0;
+            let velX = 0, velY = 0;
+
+            let targetLogZoom = 0;
+            let logZoom = 0;
+            let velLogZoom = 0;
+
+            let driftTX = 0, driftTY = 0;
+            let driftX = 0, driftY = 0;
+
+            const container = document.getElementById("gallery-container");
+            const scene = document.getElementById("gallery-scene");
+
+            let cW = container.clientWidth || 900;
+            let cH = container.clientHeight || 600;
+
+            const ro = new ResizeObserver(() => {
+                cW = container.clientWidth || cW;
+                cH = container.clientHeight || cH;
+            });
+            ro.observe(container);
+
+            const layerPools = new Map();
+            let lastOctaves = new Set();
+            let dragAccumulatorDistance = 0;
+
+            function hash3(cx, cy, cz, salt) {
+                let h = (cx | 0) * 0x8da6b343;
+                h ^= Math.imul(cy | 0, 0xd8163841);
+                h ^= Math.imul(cz | 0, 0xcb1ab31f);
+                h ^= salt | 0;
+                h ^= h >>> 16;
+                h = Math.imul(h, 0x7feb352d);
+                h ^= h >>> 15;
+                h = Math.imul(h, 0x846ca68b);
+                h ^= h >>> 16;
+                return h >>> 0;
+            }
+
+            function mulberry32(seed) {
+                let a = seed >>> 0;
+                return () => {
+                    a = (a + 0x6d2b79f5) >>> 0;
+                    let t = a;
+                    t = Math.imul(t ^ (t >>> 15), t | 1);
+                    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+                    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+                };
+            }
+
+            function lerp(a, b, t) {
+                return a + (b - a) * t;
+            }
+
+            function generateCell(gx, gy, octave) {
+                const seed = hash3(gx, gy, octave | 0, 0x9e3779b1);
+                const rand = mulberry32(seed);
+
+                const totalSubs = subN * subN;
+                const subs = Array.from({length: totalSubs}, (_, i) => i);
+                
+                for (let i = totalSubs - 1; i > 0; i--) {
+                    const j = Math.floor(rand() * (i + 1));
+                    const tmp = subs[i];
+                    subs[i] = subs[j];
+                    subs[j] = tmp;
+                }
+
+                const tiles = [];
+                const count = Math.min(effectivePerCell, totalSubs);
+                const pad = subSize * SUBCELL_INNER_PAD;
+                const innerRange = Math.max(0, subSize - pad * 2);
+
+                const cellX0 = gx * CELL_SIZE;
+                const cellY0 = gy * CELL_SIZE;
+                const wWorld = safeImageWidth / PX_PER_UNIT;
+                const hWorld = safeImageHeight / PX_PER_UNIT;
+
+                for (let slot = 0; slot < count; slot++) {
+                    const subIdx = subs[slot];
+                    const sx = subIdx % subN;
+                    const sy = Math.floor(subIdx / subN);
+
+                    const wx = cellX0 + sx * subSize + pad + rand() * innerRange;
+                    const wy = cellY0 + sy * subSize + pad + rand() * innerRange;
+                    const bakedScale = SCALE_MIN + rand() * (SCALE_MAX - SCALE_MIN);
+                    const imgIdx = Math.floor(rand() * DEFAULT_IMAGES.length) % DEFAULT_IMAGES.length;
+
+                    tiles.push({
+                        wx, wy, cx: gx, cy: gy, slot, octave, imgIdx,
+                        w: wWorld, h: hWorld, rot: 0, bakedScale
+                    });
+                }
+                return tiles;
+            }
+
+            function getPool(octave) {
+                let pool = layerPools.get(octave);
+                if (!pool) {
+                    pool = { tileEls: new Map(), imgEls: new Map() };
+                    layerPools.set(octave, pool);
+                }
+                return pool;
+            }
+
+            function disposeLayer(octave) {
+                const pool = layerPools.get(octave);
+                if (!pool) return;
+                pool.tileEls.forEach((el) => {
+                    if (el.parentNode === scene) scene.removeChild(el);
+                });
+                pool.tileEls.clear();
+                pool.imgEls.clear();
+                layerPools.delete(octave);
+            }
+
+            function removeTile(octave, key) {
+                const pool = layerPools.get(octave);
+                if (!pool) return;
+                const el = pool.tileEls.get(key);
+                if (el && el.parentNode === scene) scene.removeChild(el);
+                pool.tileEls.delete(key);
+                pool.imgEls.delete(key);
+            }
+
+            function ensureTile(t) {
+                const pool = getPool(t.octave);
+                const key = `${t.cx},${t.cy},${t.slot}`;
+                let el = pool.tileEls.get(key);
+                
+                if (!el) {
+                    el = document.createElement("div");
+                    el.style.position = "absolute";
+                    el.style.left = "50%";
+                    el.style.top = "50%";
+                    el.style.transformOrigin = "0 0";
+                    el.style.willChange = "transform, opacity";
+                    el.style.pointerEvents = "auto";
+                    el.style.cursor = "pointer";
+
+                    const img = document.createElement("img");
+                    const srcData = DEFAULT_IMAGES[t.imgIdx];
+                    img.src = srcData ? srcData.src : "";
+                    img.alt = srcData ? srcData.alt : "";
+                    img.draggable = false;
+                    img.style.width = "100%";
+                    img.style.height = "100%";
+                    img.style.objectFit = "cover";
+                    img.style.display = "block";
+                    img.style.userSelect = "none";
+                    img.style.pointerEvents = "none";
+                    
+                    el.appendChild(img);
+                    scene.appendChild(el);
+                    
+                    el.addEventListener("click", () => {
+                        if (dragAccumulatorDistance > 5) return;
+                        openCarousel(t.imgIdx);
+                    });
+                    
+                    pool.tileEls.set(key, el);
+                    pool.imgEls.set(key, img);
+                } else {
+                    const img = pool.imgEls.get(key);
+                    if (img && DEFAULT_IMAGES[t.imgIdx]) {
+                        if (img.src !== DEFAULT_IMAGES[t.imgIdx].src) {
+                            img.src = DEFAULT_IMAGES[t.imgIdx].src;
+                        }
+                    }
+                }
+                return el;
+            }
+
+            function projectLayer(octave, layerScale, layerAlpha, layerZBase, cx, cy) {
+                const pool = getPool(octave);
+                const camCellX = Math.floor(cx / CELL_SIZE);
+                const camCellY = Math.floor(cy / CELL_SIZE);
+
+                const worldHalfX = cW / 2 / (PX_PER_UNIT * layerScale);
+                const worldHalfY = cH / 2 / (PX_PER_UNIT * layerScale);
+                const rangeX = Math.min(MAX_RANGE, Math.ceil(worldHalfX / CELL_SIZE) + 1);
+                const rangeY = Math.min(MAX_RANGE, Math.ceil(worldHalfY / CELL_SIZE) + 1);
+
+                const visibleKeys = new Set();
+                const tilesThisFrame = [];
+
+                if (DEFAULT_IMAGES.length > 0) {
+                    for (let dy = -rangeY; dy <= rangeY; dy++) {
+                        for (let dx = -rangeX; dx <= rangeX; dx++) {
+                            const tiles = generateCell(camCellX + dx, camCellY + dy, octave);
+                            for (let i = 0; i < tiles.length; i++) {
+                                tilesThisFrame.push(tiles[i]);
+                            }
+                        }
+                    }
+                }
+
+                const orderKeys = new Array(tilesThisFrame.length);
+                const orderScale = new Array(tilesThisFrame.length);
+
+                for (let i = 0; i < tilesThisFrame.length; i++) {
+                    const t = tilesThisFrame[i];
+                    const key = `${t.cx},${t.cy},${t.slot}`;
+                    visibleKeys.add(key);
+
+                    const dxPx = (t.wx - cx) * layerScale * PX_PER_UNIT;
+                    const dyPx = (t.wy - cy) * layerScale * PX_PER_UNIT;
+                    const s = t.bakedScale * layerScale;
+
+                    const el = ensureTile(t);
+                    const img = pool.imgEls.get(key);
+
+                    const wPx = t.w * PX_PER_UNIT;
+                    const hPx = t.h * PX_PER_UNIT;
+
+                    el.style.transform = `translate3d(${dxPx}px, ${dyPx}px, 0) scale(${s}) rotate(${t.rot}deg) translate(${-wPx / 2}px, ${-hPx / 2}px)`;
+                    el.style.width = `${wPx}px`;
+                    el.style.height = `${hPx}px`;
+                    el.style.opacity = String(layerAlpha);
+
+                    if (img) {
+                        const radiusPx = (safeRounded / 20) * (Math.min(wPx, hPx) / 2);
+                        img.style.borderRadius = `${radiusPx}px`;
+                    }
+
+                    orderKeys[i] = key;
+                    orderScale[i] = t.bakedScale;
+                }
+
+                for (const key of Array.from(pool.tileEls.keys())) {
+                    if (!visibleKeys.has(key)) removeTile(octave, key);
+                }
+
+                const idxs = orderKeys.map((_, i) => i);
+                idxs.sort((a, b) => orderScale[a] - orderScale[b]);
+                for (let k = 0; k < idxs.length; k++) {
+                    const el = pool.tileEls.get(orderKeys[idxs[k]]);
+                    if (el) el.style.zIndex = String(layerZBase + k);
+                }
+            }
+
+            function project() {
+                const cx = camX;
+                const cy = camY;
+                const lz = logZoom;
+
+                const octave = Math.floor(lz);
+                const frac = lz - octave;
+
+                const scaleCurrent = Math.pow(2, frac);
+                const scaleNext = Math.pow(2, frac - 1);
+
+                const alphaCurrent = 1 - frac;
+                const alphaNext = frac;
+
+                projectLayer(octave, scaleCurrent, alphaCurrent, 0, cx, cy);
+                projectLayer(octave + 1, scaleNext, alphaNext, 100000, cx, cy);
+
+                const nowOctaves = new Set([octave, octave + 1]);
+                for (const o of Array.from(lastOctaves)) {
+                    if (!nowOctaves.has(o)) disposeLayer(o);
+                }
+                lastOctaves = nowOctaves;
+            }
+
+            function loop() {
+                targetX += velX;
+                targetY += velY;
+                velX *= safeFriction;
+                velY *= safeFriction;
+
+                if (velLogZoom !== 0) {
+                    targetLogZoom += velLogZoom;
+                    velLogZoom *= safeFriction;
+                }
+
+                driftX = lerp(driftX, driftTX * safeDriftAmount, 0.03); 
+                driftY = lerp(driftY, driftTY * safeDriftAmount, 0.03); 
+
+                camX = lerp(camX, targetX + driftX, 0.06); 
+                camY = lerp(camY, targetY + driftY, 0.06); 
+                logZoom = lerp(logZoom, targetLogZoom, 0.04);
+
+                project();
+                requestAnimationFrame(loop);
+            }
+
+            // ---- Input Events Engine ----
+            let dragging = false;
+            let lastPX = 0, lastPY = 0, lastT = 0, pid = null;
+
+            container.addEventListener("pointerdown", (e) => {
+                if (e.button !== 0 && e.pointerType === "mouse") return;
+                dragging = true;
+                pid = e.pointerId;
+                lastPX = e.clientX;
+                lastPY = e.clientY;
+                lastT = e.timeStamp;
+                dragAccumulatorDistance = 0; 
+                try { container.setPointerCapture(e.pointerId); } catch(err) {}
+            });
+
+            container.addEventListener("pointermove", (e) => {
+                const rect = container.getBoundingClientRect();
+                const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
+                driftTX = Math.max(-1, Math.min(1, nx));
+                driftTY = Math.max(-1, Math.min(1, ny));
+
+                if (!dragging || e.pointerId !== pid) return;
+
+                const dpx = e.clientX - lastPX;
+                const dpy = e.clientY - lastPY;
+
+                dragAccumulatorDistance += Math.sqrt(dpx * dpx + dpy * dpy);
+
+                const frac = logZoom - Math.floor(logZoom);
+                const effScale = (1 - frac) * Math.pow(2, frac) + frac * Math.pow(2, frac - 1);
+                
+                const dWorldX = (-dpx / (PX_PER_UNIT * effScale)) * safeDragSpeed;
+                const dWorldY = (-dpy / (PX_PER_UNIT * effScale)) * safeDragSpeed;
+
+                targetX += dWorldX;
+                targetY += dWorldY;
+
+                const dt = Math.max(1, e.timeStamp - lastT);
+                const k = 16 / dt;
+                velX = dWorldX * k;
+                velY = dWorldY * k;
+
+                lastPX = e.clientX;
+                lastPY = e.clientY;
+                lastT = e.timeStamp;
+            });
+
+            const onUp = (e) => {
+                if (!dragging || e.pointerId !== pid) return;
+                dragging = false;
+                pid = null;
+                try { container.releasePointerCapture(e.pointerId); } catch(err) {}
+            };
+
+            container.addEventListener("pointerup", onUp);
+            container.addEventListener("pointercancel", onUp);
+
+            container.addEventListener("wheel", (e) => {
+                e.preventDefault();
+                let delta = e.deltaY;
+                if (e.deltaMode === 1) delta *= 16;
+                else if (e.deltaMode === 2) delta *= 400;
+                const step = -delta * 0.0010 * safeDragSpeed;
+                velLogZoom += step;
+            }, { passive: false });
+
+            container.addEventListener("pointerleave", () => {
+                driftTX = 0;
+                driftTY = 0;
+            });
+
+            // ---- Hamburger Switch Interaction Mechanism ----
+            const burgerCheckbox = document.getElementById("burger");
+            const sideDrawer = document.getElementById("side-drawer");
+
+            burgerCheckbox.addEventListener("change", () => {
+                if (burgerCheckbox.checked) {
+                    sideDrawer.classList.add("open");
+                } else {
+                    sideDrawer.classList.remove("open");
+                }
+            });
+
+            // ---- Protected Admin UI Gate Routing Engine ----
+            const adminLoginBox = document.getElementById("admin-login-box");
+            const adminManagementBox = document.getElementById("admin-management-box");
+            const adminPassInput = document.getElementById("admin-pass-input");
+            const adminLoginBtn = document.getElementById("admin-login-btn");
+            const adminLoginError = document.getElementById("admin-login-error");
+
+            adminLoginBtn.onclick = () => {
+                if (adminPassInput.value === ACCESS_PASSWORD) {
+                    adminLoginBox.style.display = "none";
+                    adminManagementBox.style.display = "block";
+                    updateAdminPanelUI();
+                } else {
+                    adminLoginError.style.display = "block";
+                    adminPassInput.value = "";
+                }
+            };
+
+            adminPassInput.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") adminLoginBtn.click();
+            });
+
+            // ---- Admin Actions & List Management Tools ----
+            const adminListContainer = document.getElementById("admin-list");
+            const imgUrlInput = document.getElementById("img-url-input");
+            const addImgBtn = document.getElementById("add-img-btn");
+
+            function updateAdminPanelUI() {
+                adminListContainer.innerHTML = "";
+                DEFAULT_IMAGES.forEach((img, index) => {
+                    const item = document.createElement("div");
+                    item.className = "admin-item";
+
+                    const previewImg = document.createElement("img");
+                    previewImg.src = img.src;
+
+                    const urlLabel = document.createElement("span");
+                    urlLabel.textContent = img.src;
+
+                    const delBtn = document.createElement("button");
+                    delBtn.className = "delete-btn";
+                    delBtn.textContent = "Delete";
+                    delBtn.onclick = () => {
+                        DEFAULT_IMAGES.splice(index, 1);
+                        saveState();
+                        updateAdminPanelUI();
+                        Array.from(layerPools.keys()).forEach(disposeLayer);
+                        project();
+                    };
+
+                    item.appendChild(previewImg);
+                    item.appendChild(urlLabel);
+                    item.appendChild(delBtn);
+                    adminListContainer.appendChild(item);
+                });
+            }
+
+            addImgBtn.onclick = () => {
+                const rawUrl = imgUrlInput.value.trim();
+                if (rawUrl) {
+                    const sanitizedUrl = parseImageInputUrl(rawUrl);
+                    DEFAULT_IMAGES.push({ src: sanitizedUrl, alt: "Custom responsive layout item asset" });
+                    saveState();
+                    imgUrlInput.value = "";
+                    updateAdminPanelUI();
+                    Array.from(layerPools.keys()).forEach(disposeLayer);
+                    project();
+                }
+            };
+
+            // ---- Converted Blur Carousel Implementation ----
+            let activeCarouselIndex = 0;
+            let currentPressDir = 0;
+            let currentHoverSide = 0;
+
+            const overlay = document.getElementById("carousel-overlay");
+            const closeBtn = document.getElementById("close-carousel");
+            const imgStack = document.getElementById("carousel-img-stack");
+            const carouselFrame = document.getElementById("carousel-frame");
+            
+            const arrowPrev = document.getElementById("arrow-element-prev");
+            const arrowNext = document.getElementById("arrow-element-next");
+            const blurLeft = document.getElementById("blur-layer-prev");
+            const blurRight = document.getElementById("blur-layer-next");
+
+            function updateCarouselViewTransforms() {
+                const tiltAngle = 45; 
+                const pressScale = 0.965;
+                const pressShift = 6;
+
+                let transformStr = "";
+                if (currentPressDir !== 0) {
+                    transformStr = `translateX(${currentPressDir * pressShift}px) rotateY(${currentPressDir * tiltAngle}deg) scale(${pressScale})`;
+                } else {
+                    transformStr = `translateX(0px) rotateY(0deg) scale(1)`;
+                }
+                carouselFrame.style.transform = transformStr;
+
+                blurLeft.style.opacity = (currentHoverSide === -1) ? "1" : "0";
+                blurRight.style.opacity = (currentHoverSide === 1) ? "1" : "0";
+
+                const items = imgStack.querySelectorAll(".carousel-img");
+                items.forEach((item, idx) => {
+                    if (idx === activeCarouselIndex) {
+                        item.classList.add("active");
+                    } else {
+                        item.classList.remove("active");
+                    }
+                });
+
+                arrowPrev.style.color = (currentHoverSide === -1) ? "#ffffff" : "#FFFFFF";
+                arrowNext.style.color = (currentHoverSide === 1) ? "#ffffff" : "#FFFFFF";
+            }
+
+            function openCarousel(initialIndex) {
+                if (DEFAULT_IMAGES.length === 0) return;
+                activeCarouselIndex = initialIndex % DEFAULT_IMAGES.length;
+                
+                imgStack.innerHTML = "";
+                DEFAULT_IMAGES.forEach((imgData) => {
+                    const img = document.createElement("img");
+                    img.className = "carousel-img";
+                    img.src = imgData.src;
+                    img.alt = imgData.alt;
+                    img.draggable = false;
+                    imgStack.appendChild(img);
+                });
+
+                overlay.classList.add("active");
+                updateCarouselViewTransforms();
+            }
+
+            function navigateCarousel(direction) {
+                const total = DEFAULT_IMAGES.length;
+                if (total === 0) return;
+                activeCarouselIndex = (((activeCarouselIndex + direction) % total) + total) % total;
+                updateCarouselViewTransforms();
+            }
+
+            arrowPrev.addEventListener("pointerdown", (e) => {
+                e.preventDefault();
+                try { arrowPrev.setPointerCapture(e.pointerId); } catch(err) {}
+                currentHoverSide = -1;
+                currentPressDir = -1;
+                updateCarouselViewTransforms();
+            });
+            arrowPrev.addEventListener("pointerup", (e) => {
+                try { arrowPrev.releasePointerCapture(e.pointerId); } catch(err) {}
+                navigateCarousel(-1);
+                currentPressDir = 0;
+                updateCarouselViewTransforms();
+            });
+            arrowPrev.addEventListener("pointercancel", () => {
+                currentPressDir = 0;
+                updateCarouselViewTransforms();
+            });
+            arrowPrev.addEventListener("pointerenter", () => { currentHoverSide = -1; updateCarouselViewTransforms(); });
+            arrowPrev.addEventListener("pointerleave", () => { currentHoverSide = 0; updateCarouselViewTransforms(); });
+
+            arrowNext.addEventListener("pointerdown", (e) => {
+                e.preventDefault();
+                try { arrowNext.setPointerCapture(e.pointerId); } catch(err) {}
+                currentHoverSide = 1;
+                currentPressDir = 1;
+                updateCarouselViewTransforms();
+            });
+            arrowNext.addEventListener("pointerup", (e) => {
+                try { arrowNext.releasePointerCapture(e.pointerId); } catch(err) {}
+                navigateCarousel(1);
+                currentPressDir = 0;
+                updateCarouselViewTransforms();
+            });
+            arrowNext.addEventListener("pointercancel", () => {
+                currentPressDir = 0;
+                updateCarouselViewTransforms();
+            });
+            arrowNext.addEventListener("pointerenter", () => { currentHoverSide = 1; updateCarouselViewTransforms(); });
+            arrowNext.addEventListener("pointerleave", () => { currentHoverSide = 0; updateCarouselViewTransforms(); });
+
+            window.addEventListener("keydown", (e) => {
+                if (!overlay.classList.contains("active")) return;
+                if (e.key === "ArrowRight") {
+                    e.preventDefault();
+                    navigateCarousel(1);
+                } else if (e.key === "ArrowLeft") {
+                    e.preventDefault();
+                    navigateCarousel(-1);
+                } else if (e.key === "Escape") {
+                    closeBtn.click();
+                }
+            });
+
+            closeBtn.onclick = () => {
+                overlay.classList.remove("active");
+                currentPressDir = 0;
+                currentHoverSide = 0;
+            };
+
+            requestAnimationFrame(loop);
+        })();
+    </script>
+</body>
+</html>
