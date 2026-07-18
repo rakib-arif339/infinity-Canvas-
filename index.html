@@ -32,7 +32,7 @@
             transition: opacity 0.6s ease, visibility 0.6s;
         }
 
-        /* Loading Animation Styles (From Uiverse.io by JaydipPrajapati1910) */
+        /* Loading Animation Styles */
         .loader-container {
             display: flex;
             justify-content: center;
@@ -114,14 +114,13 @@
             59.94444443% { top: 0; height: 0; }
         }
 
-        /* Typography Sub-label under Animation */
         .loading-text-label {
             margin-top: 64px;
             color: #e2e8f0;
             font-size: 13px;
             letter-spacing: 0.18em;
             text-transform: uppercase;
-            font-weight: 900; /* Heavy Black weight styling profile */
+            font-weight: 900;
             text-align: center;
             user-select: none;
         }
@@ -150,7 +149,7 @@
             inset: 0;
         }
 
-        /* ---- Hamburger Component Styling (From Uiverse.io by tarantino421) ---- */
+        /* ---- Hamburger Component Styling ---- */
         .buttons__burger {
           --size: 2.2rem;
           --clr: #fff; 
@@ -349,11 +348,29 @@
             text-decoration: underline;
         }
 
-        /* ---- Blur Carousel Lightbox Overlays ---- */
+        /* ---- Blur Carousel Lightbox Overlays (Matched to Your Clean Reference Photo) ---- */
+        :root {
+            --card-width: 500px;
+            --card-height: 500px;
+            --radius-px: 0px;
+            --tilt-deg: 45deg;
+            --blur-amount: 40px;
+            --arrow-size: 40px;
+            --arrow-color: #ffffff;
+            --arrow-inactive-color: #ffffff;
+            --transition-dur: 0.2s;
+            --transition-ease: linear;
+            --overlay-darken: 0.35;
+            --perspective: 1100px;
+            --press-scale: 0.965;
+            --press-shift: 6px;
+            --blur-width: 42%;
+        }
+
         #carousel-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.85);
+            background-color: #141414;
             z-index: 100;
             display: none;
             align-items: center;
@@ -367,7 +384,7 @@
             opacity: 1;
         }
 
-        #carousel-root {
+        .blur-carousel-root {
             position: relative;
             width: 100%;
             height: 100%;
@@ -376,21 +393,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            perspective: 1100px;
+            perspective: var(--perspective);
             outline: none;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
 
-        #carousel-frame {
+        .blur-carousel-frame {
             position: relative;
-            width: 480px;
-            height: 500px;
+            width: var(--card-width);
+            height: var(--card-height);
+            border-radius: var(--radius-px);
+            clip-path: inset(0 round var(--radius-px));
             overflow: hidden;
             background: #0c0c0c;
             transform-style: preserve-3d;
             transform-origin: center center;
-            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform var(--transition-dur) var(--transition-ease);
         }
 
         .carousel-img {
@@ -401,82 +420,108 @@
             object-fit: cover;
             display: block;
             opacity: 0;
-            transition: opacity 0.2s linear;
             pointer-events: none;
+            transition: opacity var(--transition-dur) ease;
+            z-index: 1;
         }
 
         .carousel-img.active {
             opacity: 1;
+            pointer-events: auto;
         }
 
-        #carousel-gradient {
+        .legibility-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 42%);
+            background: linear-gradient(180deg, rgba(0,0,0,var(--overlay-darken)) 0%, rgba(0,0,0,0) 42%);
             pointer-events: none;
-            z-index: 4;
+            z-index: 2;
+        }
+
+        /* Title explicitly hidden to match the clean view mode of your screenshot */
+        .carousel-title {
+            display: none !important;
         }
 
         .blur-overlay {
             position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 42%;
+            backdrop-filter: blur(var(--blur-amount));
+            -webkit-backdrop-filter: blur(var(--blur-amount));
             opacity: 0;
             transition: opacity 0.4s ease;
             pointer-events: none;
             z-index: 3;
         }
 
-        .blur-left {
-            left: 0;
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+        .blur-carousel-root[data-movement="horizontal"] .blur-prev {
+            top: 0; bottom: 0; left: 0; width: var(--blur-width);
             mask-image: linear-gradient(to right, #000 0%, transparent 100%);
             -webkit-mask-image: linear-gradient(to right, #000 0%, transparent 100%);
         }
 
-        .blur-right {
-            right: 0;
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+        .blur-carousel-root[data-movement="horizontal"] .blur-next {
+            top: 0; bottom: 0; right: 0; width: var(--blur-width);
             mask-image: linear-gradient(to left, #000 0%, transparent 100%);
             -webkit-mask-image: linear-gradient(to left, #000 0%, transparent 100%);
         }
 
-        .carousel-arrow {
+        .blur-prev.hovered, .blur-next.hovered {
+            opacity: 1;
+        }
+
+        .arrow-wrap {
             position: absolute;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 44px;
-            height: 44px;
+            width: calc(var(--arrow-size) + 18px);
+            height: calc(var(--arrow-size) + 18px);
             z-index: 5;
             cursor: pointer;
-            color: rgba(255,255,255,0.6);
+            color: var(--arrow-inactive-color);
             transition: color 0.25s ease, transform 0.2s ease;
             touch-action: none;
-            top: 50%;
-            transform: translateY(-50%);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
         }
 
-        .arrow-prev { left: 14px; }
-        .arrow-next { right: 14px; }
+        .arrow-wrap:hover {
+            color: var(--arrow-color);
+        }
+
+        .blur-carousel-root[data-movement="horizontal"] .arrow-prev {
+            top: 50%; left: 14px; transform: translateY(-50%);
+        }
+
+        .blur-carousel-root[data-movement="horizontal"] .arrow-next {
+            top: 50%; right: 14px; transform: translateY(-50%);
+        }
+
+        .arrow-wrap svg {
+            width: var(--arrow-size);
+            height: var(--arrow-size);
+        }
 
         #close-carousel {
             position: absolute;
             top: 20px;
             right: 20px;
-            background: none;
-            border: none;
-            color: rgba(255,255,255,0.6);
-            font-size: 32px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            color: rgba(255,255,255,0.8);
+            width: 36px;
+            height: 36px;
+            font-size: 20px;
             cursor: pointer;
             z-index: 110;
-            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s;
         }
 
         #close-carousel:hover {
+            background: rgba(255, 255, 255, 0.2);
             color: #fff;
         }
     </style>
@@ -552,20 +597,34 @@
 
     <!-- ---- Blur Carousel Lightbox Overlays ---- -->
     <div id="carousel-overlay">
-        <button id="close-carousel">&times;</button>
-        <div id="carousel-root">
-            <div id="carousel-frame">
-                <div id="carousel-img-stack"></div>
-                <div id="carousel-gradient"></div>
-                <div class="blur-overlay blur-left" id="blur-layer-prev"></div>
-                <div class="blur-overlay blur-right" id="blur-layer-next"></div>
+        <button id="close-carousel" title="Close & Return to Canvas">&#10005;</button>
+        <div class="blur-carousel-root" data-movement="horizontal" tabindex="0" role="group" aria-roledescription="carousel">
+            <div class="blur-carousel-frame" id="carouselFrame">
                 
-                <div class="carousel-arrow arrow-prev" id="arrow-element-prev" role="button" aria-label="Previous slide">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                <!-- Dynamic Slide Deck Content will be injected here -->
+                <div id="carousel-content-stack" style="display: contents;"></div>
+
+                <!-- Linear Anti-Glare Overlay -->
+                <div class="legibility-overlay"></div>
+
+                <!-- Blur Creep Insets -->
+                <div class="blur-overlay blur-prev" id="blurPrev"></div>
+                <div class="blur-overlay blur-next" id="blurNext"></div>
+
+                <!-- Previous Control Trigger (Left Arrow) -->
+                <div class="arrow-wrap arrow-prev" id="btnPrev" role="button" aria-label="Previous slide">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline id="polyPrev" points="15 18 9 12 15 6"></polyline>
+                    </svg>
                 </div>
-                <div class="carousel-arrow arrow-next" id="arrow-element-next" role="button" aria-label="Next slide">
-                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+
+                <!-- Next Control Trigger (Right Arrow) -->
+                <div class="arrow-wrap arrow-next" id="btnNext" role="button" aria-label="Next slide">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline id="polyNext" points="9 18 15 12 9 6"></polyline>
+                    </svg>
                 </div>
+
             </div>
         </div>
     </div>
@@ -603,7 +662,7 @@
                     setTimeout(() => {
                         loader.style.visibility = "hidden";
                     }, 600);
-                }, 2500); // 2.5 seconds showcase delay
+                }, 2500);
             });
 
             // ---- Google Drive Stream Link Converter ----
@@ -807,9 +866,22 @@
                     el.appendChild(img);
                     scene.appendChild(el);
                     
+                    // ---- FIX: Reliable Tap & Click Detection without Drag Conflict ----
+                    let downX = 0, downY = 0;
+                    el.addEventListener("pointerdown", (e) => {
+                        downX = e.clientX;
+                        downY = e.clientY;
+                    });
+                    el.addEventListener("pointerup", (e) => {
+                        const dist = Math.hypot(e.clientX - downX, e.clientY - downY);
+                        if (dist < 6 && dragAccumulatorDistance <= 5) {
+                            openCarousel(t.imgIdx);
+                        }
+                    });
                     el.addEventListener("click", () => {
-                        if (dragAccumulatorDistance > 5) return;
-                        openCarousel(t.imgIdx);
+                        if (dragAccumulatorDistance <= 5) {
+                            openCarousel(t.imgIdx);
+                        }
                     });
                     
                     pool.tileEls.set(key, el);
@@ -951,7 +1023,7 @@
                 lastPY = e.clientY;
                 lastT = e.timeStamp;
                 dragAccumulatorDistance = 0; 
-                try { container.setPointerCapture(e.pointerId); } catch(err) {}
+                // Notice we do NOT capture immediately so image clicks remain untouched!
             });
 
             container.addEventListener("pointermove", (e) => {
@@ -967,6 +1039,11 @@
                 const dpy = e.clientY - lastPY;
 
                 dragAccumulatorDistance += Math.sqrt(dpx * dpx + dpy * dpy);
+
+                // ---- FIX: Only capture pointer when real dragging occurs ----
+                if (dragAccumulatorDistance > 5) {
+                    try { container.setPointerCapture(e.pointerId); } catch(err) {}
+                }
 
                 const frac = logZoom - Math.floor(logZoom);
                 const effScale = (1 - frac) * Math.pow(2, frac) + frac * Math.pow(2, frac - 1);
@@ -1094,122 +1171,116 @@
             };
 
             // ---- Converted Blur Carousel Implementation ----
-            let activeCarouselIndex = 0;
-            let currentPressDir = 0;
-            let currentHoverSide = 0;
-
             const overlay = document.getElementById("carousel-overlay");
             const closeBtn = document.getElementById("close-carousel");
-            const imgStack = document.getElementById("carousel-img-stack");
-            const carouselFrame = document.getElementById("carousel-frame");
+            const contentStack = document.getElementById("carousel-content-stack");
+            const carouselFrame = document.getElementById("carouselFrame");
+            const blurRoot = overlay.querySelector(".blur-carousel-root");
             
-            const arrowPrev = document.getElementById("arrow-element-prev");
-            const arrowNext = document.getElementById("arrow-element-next");
-            const blurLeft = document.getElementById("blur-layer-prev");
-            const blurRight = document.getElementById("blur-layer-next");
+            const blurPrev = document.getElementById("blurPrev");
+            const blurNext = document.getElementById("blurNext");
+            const btnPrev = document.getElementById("btnPrev");
+            const btnNext = document.getElementById("btnNext");
+            const polyPrev = document.getElementById("polyPrev");
+            const polyNext = document.getElementById("polyNext");
 
-            function updateCarouselViewTransforms() {
-                const tiltAngle = 45; 
-                const pressScale = 0.965;
-                const pressShift = 6;
+            let currentIndex = 0;
+            const tiltDeg = 45; 
+            const pressShift = 6;
+            const pressScale = 0.965;
+            const isVertical = blurRoot.getAttribute("data-movement") === "vertical";
 
-                let transformStr = "";
-                if (currentPressDir !== 0) {
-                    transformStr = `translateX(${currentPressDir * pressShift}px) rotateY(${currentPressDir * tiltAngle}deg) scale(${pressScale})`;
-                } else {
-                    transformStr = `translateX(0px) rotateY(0deg) scale(1)`;
-                }
-                carouselFrame.style.transform = transformStr;
+            if (!isVertical) {
+                polyPrev.setAttribute("points", "15 18 9 12 15 6");
+                polyNext.setAttribute("points", "9 18 15 12 9 6");
+            }
 
-                blurLeft.style.opacity = (currentHoverSide === -1) ? "1" : "0";
-                blurRight.style.opacity = (currentHoverSide === 1) ? "1" : "0";
+            function updateCarousel(nextIndex) {
+                const imgs = contentStack.querySelectorAll(".carousel-img");
+                const totalSlides = imgs.length;
+                if (totalSlides === 0) return;
 
-                const items = imgStack.querySelectorAll(".carousel-img");
-                items.forEach((item, idx) => {
-                    if (idx === activeCarouselIndex) {
-                        item.classList.add("active");
-                    } else {
-                        item.classList.remove("active");
-                    }
-                });
-
-                arrowPrev.style.color = (currentHoverSide === -1) ? "#ffffff" : "#FFFFFF";
-                arrowNext.style.color = (currentHoverSide === 1) ? "#ffffff" : "#FFFFFF";
+                imgs[currentIndex]?.classList.remove("active");
+                currentIndex = ((nextIndex % totalSlides) + totalSlides) % totalSlides;
+                imgs[currentIndex]?.classList.add("active");
             }
 
             function openCarousel(initialIndex) {
                 if (DEFAULT_IMAGES.length === 0) return;
-                activeCarouselIndex = initialIndex % DEFAULT_IMAGES.length;
+                currentIndex = initialIndex % DEFAULT_IMAGES.length;
                 
-                imgStack.innerHTML = "";
-                DEFAULT_IMAGES.forEach((imgData) => {
+                contentStack.innerHTML = "";
+                
+                DEFAULT_IMAGES.forEach((imgData, idx) => {
                     const img = document.createElement("img");
-                    img.className = "carousel-img";
+                    img.className = "carousel-img" + (idx === currentIndex ? " active" : "");
                     img.src = imgData.src;
                     img.alt = imgData.alt;
                     img.draggable = false;
-                    imgStack.appendChild(img);
+                    contentStack.appendChild(img);
                 });
 
                 overlay.classList.add("active");
-                updateCarouselViewTransforms();
+                carouselFrame.style.transform = `translateY(0px) rotateX(0deg) scale(1)`;
+                if (blurRoot && blurRoot.focus) blurRoot.focus();
             }
 
-            function navigateCarousel(direction) {
-                const total = DEFAULT_IMAGES.length;
-                if (total === 0) return;
-                activeCarouselIndex = (((activeCarouselIndex + direction) % total) + total) % total;
-                updateCarouselViewTransforms();
+            function handlePointerDown(dir, e) {
+                e.preventDefault();
+                btnPrev.setPointerCapture?.(e.pointerId);
+                btnNext.setPointerCapture?.(e.pointerId);
+
+                if (dir === -1) blurPrev.classList.add("hovered");
+                if (dir === 1) blurNext.classList.add("hovered");
+
+                if (isVertical) {
+                    carouselFrame.style.transform = `translateY(${dir * pressShift}px) rotateX(${-dir * tiltDeg}deg) scale(${pressScale})`;
+                } else {
+                    carouselFrame.style.transform = `translateX(${dir * pressShift}px) rotateY(${dir * tiltDeg}deg) scale(${pressScale})`;
+                }
             }
 
-            arrowPrev.addEventListener("pointerdown", (e) => {
-                e.preventDefault();
-                try { arrowPrev.setPointerCapture(e.pointerId); } catch(err) {}
-                currentHoverSide = -1;
-                currentPressDir = -1;
-                updateCarouselViewTransforms();
-            });
-            arrowPrev.addEventListener("pointerup", (e) => {
-                try { arrowPrev.releasePointerCapture(e.pointerId); } catch(err) {}
-                navigateCarousel(-1);
-                currentPressDir = 0;
-                updateCarouselViewTransforms();
-            });
-            arrowPrev.addEventListener("pointercancel", () => {
-                currentPressDir = 0;
-                updateCarouselViewTransforms();
-            });
-            arrowPrev.addEventListener("pointerenter", () => { currentHoverSide = -1; updateCarouselViewTransforms(); });
-            arrowPrev.addEventListener("pointerleave", () => { currentHoverSide = 0; updateCarouselViewTransforms(); });
+            function handlePointerUp(dir, e) {
+                btnPrev.releasePointerCapture?.(e.pointerId);
+                btnNext.releasePointerCapture?.(e.pointerId);
+                
+                carouselFrame.style.transform = `translateY(0px) rotateX(0deg) scale(1)`;
+                updateCarousel(currentIndex + dir);
+            }
 
-            arrowNext.addEventListener("pointerdown", (e) => {
-                e.preventDefault();
-                try { arrowNext.setPointerCapture(e.pointerId); } catch(err) {}
-                currentHoverSide = 1;
-                currentPressDir = 1;
-                updateCarouselViewTransforms();
+            function handlePointerCancel() {
+                carouselFrame.style.transform = `translateY(0px) rotateX(0deg) scale(1)`;
+            }
+
+            btnPrev.addEventListener("pointerdown", (e) => handlePointerDown(-1, e));
+            btnPrev.addEventListener("pointerup", (e) => handlePointerUp(-1, e));
+            btnPrev.addEventListener("pointercancel", handlePointerCancel);
+            btnPrev.addEventListener("pointerenter", () => blurPrev.classList.add("hovered"));
+            btnPrev.addEventListener("pointerleave", () => {
+                blurPrev.classList.remove("hovered");
+                handlePointerCancel();
             });
-            arrowNext.addEventListener("pointerup", (e) => {
-                try { arrowNext.releasePointerCapture(e.pointerId); } catch(err) {}
-                navigateCarousel(1);
-                currentPressDir = 0;
-                updateCarouselViewTransforms();
+
+            btnNext.addEventListener("pointerdown", (e) => handlePointerDown(1, e));
+            btnNext.addEventListener("pointerup", (e) => handlePointerUp(1, e));
+            btnNext.addEventListener("pointercancel", handlePointerCancel);
+            btnNext.addEventListener("pointerenter", () => blurNext.classList.add("hovered"));
+            btnNext.addEventListener("pointerleave", () => {
+                blurNext.classList.remove("hovered");
+                handlePointerCancel();
             });
-            arrowNext.addEventListener("pointercancel", () => {
-                currentPressDir = 0;
-                updateCarouselViewTransforms();
-            });
-            arrowNext.addEventListener("pointerenter", () => { currentHoverSide = 1; updateCarouselViewTransforms(); });
-            arrowNext.addEventListener("pointerleave", () => { currentHoverSide = 0; updateCarouselViewTransforms(); });
 
             window.addEventListener("keydown", (e) => {
                 if (!overlay.classList.contains("active")) return;
-                if (e.key === "ArrowRight") {
+                const nextKey = isVertical ? "ArrowDown" : "ArrowRight";
+                const prevKey = isVertical ? "ArrowUp" : "ArrowLeft";
+                
+                if (e.key === nextKey || e.key === "ArrowRight") {
                     e.preventDefault();
-                    navigateCarousel(1);
-                } else if (e.key === "ArrowLeft") {
+                    updateCarousel(currentIndex + 1);
+                } else if (e.key === prevKey || e.key === "ArrowLeft") {
                     e.preventDefault();
-                    navigateCarousel(-1);
+                    updateCarousel(currentIndex - 1);
                 } else if (e.key === "Escape") {
                     closeBtn.click();
                 }
@@ -1217,8 +1288,6 @@
 
             closeBtn.onclick = () => {
                 overlay.classList.remove("active");
-                currentPressDir = 0;
-                currentHoverSide = 0;
             };
 
             requestAnimationFrame(loop);
