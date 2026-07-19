@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Infinity Canvas Gallery — Admin & Carousel View</title>
     <style>
         * {
@@ -1052,19 +1052,32 @@
                 requestAnimationFrame(loop);
             }
 
-            // ---- Input Events Engine ----
+            // ---- Input Events & Mobile Pinch-to-Zoom Engine ----
             let dragging = false;
             let lastPX = 0, lastPY = 0, lastT = 0, pid = null;
+            let activePointers = new Map();
+            let prevPinchDist = 0;
+
+            function getPinchDistance(pointersMap) {
+                const pts = Array.from(pointersMap.values());
+                if (pts.length < 2) return 0;
+                return Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+            }
 
             container.addEventListener("pointerdown", (e) => {
                 if (e.button !== 0 && e.pointerType === "mouse") return;
-                dragging = true;
-                pid = e.pointerId;
-                lastPX = e.clientX;
-                lastPY = e.clientY;
-                lastT = e.timeStamp;
-                dragAccumulatorDistance = 0; 
-                // Notice we do NOT capture immediately so image clicks remain untouched!
+                activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+                if (activePointers.size === 1) {
+                    dragging = true;
+                    pid = e.pointerId;
+                    lastPX = e.clientX;
+                    lastPY = e.clientY;
+                    lastT = e.timeStamp;
+                    dragAccumulatorDistance = 0; 
+                } else if (activePointers.size === 2) {
+                    prevPinchDist = getPinchDistance(activePointers);
+                }
             });
 
             container.addEventListener("pointermove", (e) => {
@@ -1073,6 +1086,21 @@
                 const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1;
                 driftTX = Math.max(-1, Math.min(1, nx));
                 driftTY = Math.max(-1, Math.min(1, ny));
+
+                if (activePointers.has(e.pointerId)) {
+                    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+                }
+
+                // ---- FIX: Mobile 2-Finger Pinch to Infinity Zoom ----
+                if (activePointers.size === 2) {
+                    const currentPinchDist = getPinchDistance(activePointers);
+                    if (prevPinchDist > 0) {
+                        const diff = currentPinchDist - prevPinchDist;
+                        velLogZoom += diff * 0.005 * safeDragSpeed;
+                    }
+                    prevPinchDist = currentPinchDist;
+                    return;
+                }
 
                 if (!dragging || e.pointerId !== pid) return;
 
@@ -1106,9 +1134,20 @@
             });
 
             const onUp = (e) => {
-                if (!dragging || e.pointerId !== pid) return;
-                dragging = false;
-                pid = null;
+                activePointers.delete(e.pointerId);
+                if (activePointers.size === 1) {
+                    const remainingId = Array.from(activePointers.keys())[0];
+                    const remainingPos = activePointers.get(remainingId);
+                    pid = remainingId;
+                    lastPX = remainingPos && remainingPos.x ? remainingPos.x : 0;
+                    lastPY = remainingPos && remainingPos.y ? remainingPos.y : 0;
+                    lastT = e.timeStamp;
+                    prevPinchDist = 0;
+                } else if (activePointers.size === 0) {
+                    prevPinchDist = 0;
+                    dragging = false;
+                    pid = null;
+                }
                 try { container.releasePointerCapture(e.pointerId); } catch(err) {}
             };
 
