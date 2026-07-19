@@ -634,8 +634,10 @@
             // ---- System Password Configuration Access Key ----
             const ACCESS_PASSWORD = "admin123";
 
-            // ---- Persistent LocalStorage Sync Infrastructure ----
-            const STORAGE_KEY = "infinity_canvas_image_registry";
+            // ---- Persistent JSONBin.io Cloud Database Infrastructure ----
+            const BIN_ID = "6a5cee68f5f4af5e29a43f49";
+            const MASTER_KEY = "$2a$10$P5WdNrwt9dVeSPAjp9dJ5.qAjmXbM/6M4ajRZOUInQJXD6zQ3tv.O";
+            
             const BACKING_ASSETS = [
                 { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/612d1402-0ad9-4135-3bbc-a30a6a252b00/w=800", alt: "Card 1" },
                 { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/6d2ad64a-102d-4eab-0efe-31479e34b500/w=800", alt: "Card 2" },
@@ -647,12 +649,51 @@
                 { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/316d1761-fd79-4ca9-b8d4-f2bb20521a00/w=800", alt: "Card 8" }
             ];
 
-            let stored = localStorage.getItem(STORAGE_KEY);
-            let DEFAULT_IMAGES = stored ? JSON.parse(stored) : BACKING_ASSETS;
+            let DEFAULT_IMAGES = [...BACKING_ASSETS];
 
-            function saveState() {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_IMAGES));
+            // Fetch Permanent Data from Cloud Database
+            async function loadState() {
+                try {
+                    const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                        method: 'GET',
+                        headers: {
+                            'X-Master-Key': MASTER_KEY
+                        }
+                    });
+                    const data = await response.json();
+                    if (data && data.record && Array.isArray(data.record.images)) {
+                        if (data.record.images.length > 0) {
+                            DEFAULT_IMAGES = data.record.images;
+                        } else {
+                            DEFAULT_IMAGES = [...BACKING_ASSETS];
+                        }
+                        updateAdminPanelUI();
+                        Array.from(layerPools.keys()).forEach(disposeLayer);
+                        project();
+                    }
+                } catch (err) {
+                    console.error("Cloud load failed, using fallback:", err);
+                }
             }
+
+            // Save Permanent Data to Cloud Database
+            async function saveState() {
+                try {
+                    await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': MASTER_KEY
+                        },
+                        body: JSON.stringify({ images: DEFAULT_IMAGES })
+                    });
+                } catch (err) {
+                    console.error("Cloud save failed:", err);
+                }
+            }
+
+            // Load from cloud immediately when script runs
+            loadState();
 
             // ---- Dismiss Loading Interface After Delay ----
             window.addEventListener("load", () => {
