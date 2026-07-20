@@ -209,6 +209,30 @@
           top: 50%;
         }
 
+        /* ---- Gyroscope Motion Permission Button ---- */
+        #motion-btn {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 30;
+            display: none;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        #motion-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
         /* ---- Side Navigation Drawer Wrapper Container ---- */
         #side-drawer {
             position: fixed;
@@ -561,6 +585,9 @@
         <span></span>
     </label>
 
+    <!-- ---- Gyroscope Motion Permission Button ---- -->
+    <button id="motion-btn">📲 Enable Motion</button>
+
     <!-- ---- Navigation Panel Side Drawer Container ---- -->
     <div id="side-drawer">
         <div class="menu-placeholder-section">
@@ -704,6 +731,12 @@
                         loader.style.visibility = "hidden";
                     }, 600);
                 }, 2500);
+
+                // Show motion button only on touch/mobile devices
+                if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                    const motionBtn = document.getElementById("motion-btn");
+                    if (motionBtn) motionBtn.style.display = "block";
+                }
             });
 
             // ---- Google Drive Stream Link Converter ----
@@ -1167,6 +1200,50 @@
                 driftTX = 0;
                 driftTY = 0;
             });
+
+            // ---- 360 Degree Mobile Gyroscope Motion Control Engine ----
+            const motionBtn = document.getElementById("motion-btn");
+            let initialBeta = null;
+            let initialGamma = null;
+
+            function handleOrientation(e) {
+                if (e.beta === null || e.gamma === null) return;
+                
+                if (initialBeta === null) {
+                    initialBeta = e.beta;
+                    initialGamma = e.gamma;
+                }
+
+                // Calculate tilt relative to starting position
+                const deltaBeta = e.beta - initialBeta;
+                const deltaGamma = e.gamma - initialGamma;
+
+                // Map tilt angles to drift (-1 to 1) for natural panning
+                driftTY = Math.max(-1, Math.min(1, deltaBeta / 25));
+                driftTX = Math.max(-1, Math.min(1, deltaGamma / 25));
+            }
+
+            if (motionBtn) {
+                motionBtn.addEventListener("click", () => {
+                    if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+                        DeviceOrientationEvent.requestPermission()
+                            .then(permissionState => {
+                                if (permissionState === "granted") {
+                                    window.addEventListener("deviceorientation", handleOrientation);
+                                    motionBtn.style.background = "rgba(46, 213, 115, 0.4)";
+                                    motionBtn.textContent = "✓ Motion Active";
+                                    setTimeout(() => { motionBtn.style.display = "none"; }, 2000);
+                                }
+                            })
+                            .catch(console.error);
+                    } else {
+                        window.addEventListener("deviceorientation", handleOrientation);
+                        motionBtn.style.background = "rgba(46, 213, 115, 0.4)";
+                        motionBtn.textContent = "✓ Motion Active";
+                        setTimeout(() => { motionBtn.style.display = "none"; }, 2000);
+                    }
+                });
+            }
 
             // ---- Hamburger Switch Interaction Mechanism ----
             const burgerCheckbox = document.getElementById("burger");
