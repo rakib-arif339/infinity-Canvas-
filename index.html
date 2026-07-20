@@ -1201,7 +1201,7 @@
                 driftTY = 0;
             });
 
-            // ---- 360 Degree Mobile Gyroscope Motion Control Engine (Upgraded Smooth Version) ----
+            // ---- 360 Degree Mobile Gyroscope Motion Control Engine (Super Smooth & Calm Version) ----
             const motionBtn = document.getElementById("motion-btn");
             let initialBeta = null;
             let initialGamma = null;
@@ -1226,21 +1226,21 @@
                 if (deltaBeta > 180) deltaBeta -= 360;
                 if (deltaBeta < -180) deltaBeta += 360;
 
-                // Apply Low-Pass Exponential Filter (LERP) to eliminate sensor jitter and shaking
-                smoothBeta = lerp(smoothBeta, deltaBeta, 0.05);
-                smoothGamma = lerp(smoothGamma, deltaGamma, 0.05);
+                // Heavy Low-Pass LERP Filter (0.03) to eliminate sensor jitter and make motion ultra-smooth
+                smoothBeta = lerp(smoothBeta, deltaBeta, 0.03);
+                smoothGamma = lerp(smoothGamma, deltaGamma, 0.03);
 
-                // 1. Smooth Tilt Offset (Drift)
-                driftTY = Math.max(-1, Math.min(1, smoothBeta / 35));
-                driftTX = Math.max(-1, Math.min(1, smoothGamma / 35));
+                // 1. Gentle Tilt Offset (Drift) - Reduced sensitivity by 70% (Divisor increased to 90)
+                driftTY = Math.max(-1, Math.min(1, smoothBeta / 90));
+                driftTX = Math.max(-1, Math.min(1, smoothGamma / 90));
 
-                // 2. Smooth Infinite Panning Velocity (Gliding through space when tilted)
+                // 2. Calm Infinite Panning Velocity - Added a larger dead-zone (3.5 deg) and slowed down by 70%
                 if (!dragging) {
-                    if (Math.abs(smoothGamma) > 1.5) {
-                        velX += (smoothGamma * 0.05) * safeDragSpeed;
+                    if (Math.abs(smoothGamma) > 3.5) {
+                        velX += (smoothGamma * 0.015) * safeDragSpeed;
                     }
-                    if (Math.abs(smoothBeta) > 1.5) {
-                        velY += (smoothBeta * 0.05) * safeDragSpeed;
+                    if (Math.abs(smoothBeta) > 3.5) {
+                        velY += (smoothBeta * 0.015) * safeDragSpeed;
                     }
                 }
             }
