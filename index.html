@@ -1201,7 +1201,7 @@
                 driftTY = 0;
             });
 
-            // ---- 360 Degree Mobile Gyroscope Engine (Direct 1:1 Responsive Version) ----
+            // ---- 360 Degree Mobile Gyroscope Engine (Super Slow & Gentle Version) ----
             const motionBtn = document.getElementById("motion-btn");
             let initialBeta = null;
             let initialGamma = null;
@@ -1230,19 +1230,17 @@
                 tiltX = lerp(tiltX, deltaGamma, 0.20);
                 tiltY = lerp(tiltY, deltaBeta, 0.20);
 
-                // 1. Instant Directional Tilt Feedback (Drift)
-                driftTX = Math.max(-1, Math.min(1, tiltX / 25));
-                driftTY = Math.max(-1, Math.min(1, tiltY / 25));
+                // 1. Gentle & Subtle Tilt Feedback (Divisor increased from 25 to 45 for slower tilt)
+                driftTX = Math.max(-1, Math.min(1, tiltX / 45));
+                driftTY = Math.max(-1, Math.min(1, tiltY / 45));
 
-                // 2. Direct 1:1 Responsive Panning:
-                // We directly drive targetX and targetY without momentum buildup!
-                // Whichever direction you tilt, the canvas moves there. When you hold phone flat, it stops instantly!
+                // 2. Slow & Calm Panning (Speed multiplier reduced from 0.04 to 0.015 for butter-slow motion)
                 if (!dragging) {
                     if (Math.abs(tiltX) > 0.8) {
-                        targetX += (tiltX * 0.04) * safeDragSpeed;
+                        targetX += (tiltX * 0.015) * safeDragSpeed;
                     }
                     if (Math.abs(tiltY) > 0.8) {
-                        targetY += (tiltY * 0.04) * safeDragSpeed;
+                        targetY += (tiltY * 0.015) * safeDragSpeed;
                     }
                 }
             }
