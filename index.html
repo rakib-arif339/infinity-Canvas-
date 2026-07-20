@@ -1201,12 +1201,12 @@
                 driftTY = 0;
             });
 
-            // ---- 360 Degree Mobile Gyroscope Motion Control Engine (Super Smooth & Calm Version) ----
+            // ---- 360 Degree Mobile Gyroscope Engine (Direct 1:1 Responsive Version) ----
             const motionBtn = document.getElementById("motion-btn");
             let initialBeta = null;
             let initialGamma = null;
-            let smoothBeta = 0;
-            let smoothGamma = 0;
+            let tiltX = 0;
+            let tiltY = 0;
 
             function handleOrientation(e) {
                 if (e.beta === null || e.gamma === null) return;
@@ -1216,31 +1216,33 @@
                     initialGamma = e.gamma;
                 }
 
-                // Calculate tilt angle difference from starting position
+                // Calculate exact angle difference from starting position
                 let deltaBeta = e.beta - initialBeta;
                 let deltaGamma = e.gamma - initialGamma;
 
-                // Handle 360 wrap-around to prevent sudden camera jumps
+                // Handle 360 wrap-around to prevent sudden jumps
                 if (deltaGamma > 180) deltaGamma -= 360;
                 if (deltaGamma < -180) deltaGamma += 360;
                 if (deltaBeta > 180) deltaBeta -= 360;
                 if (deltaBeta < -180) deltaBeta += 360;
 
-                // Heavy Low-Pass LERP Filter (0.03) to eliminate sensor jitter and make motion ultra-smooth
-                smoothBeta = lerp(smoothBeta, deltaBeta, 0.03);
-                smoothGamma = lerp(smoothGamma, deltaGamma, 0.03);
+                // Super fast & crisp LERP (0.20) removes jitter without sluggish delay
+                tiltX = lerp(tiltX, deltaGamma, 0.20);
+                tiltY = lerp(tiltY, deltaBeta, 0.20);
 
-                // 1. Gentle Tilt Offset (Drift) - Reduced sensitivity by 70% (Divisor increased to 90)
-                driftTY = Math.max(-1, Math.min(1, smoothBeta / 90));
-                driftTX = Math.max(-1, Math.min(1, smoothGamma / 90));
+                // 1. Instant Directional Tilt Feedback (Drift)
+                driftTX = Math.max(-1, Math.min(1, tiltX / 25));
+                driftTY = Math.max(-1, Math.min(1, tiltY / 25));
 
-                // 2. Calm Infinite Panning Velocity - Added a larger dead-zone (3.5 deg) and slowed down by 70%
+                // 2. Direct 1:1 Responsive Panning:
+                // We directly drive targetX and targetY without momentum buildup!
+                // Whichever direction you tilt, the canvas moves there. When you hold phone flat, it stops instantly!
                 if (!dragging) {
-                    if (Math.abs(smoothGamma) > 3.5) {
-                        velX += (smoothGamma * 0.015) * safeDragSpeed;
+                    if (Math.abs(tiltX) > 0.8) {
+                        targetX += (tiltX * 0.04) * safeDragSpeed;
                     }
-                    if (Math.abs(smoothBeta) > 3.5) {
-                        velY += (smoothBeta * 0.015) * safeDragSpeed;
+                    if (Math.abs(tiltY) > 0.8) {
+                        targetY += (tiltY * 0.04) * safeDragSpeed;
                     }
                 }
             }
