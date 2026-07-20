@@ -1201,10 +1201,12 @@
                 driftTY = 0;
             });
 
-            // ---- 360 Degree Mobile Gyroscope Motion Control Engine ----
+            // ---- 360 Degree Mobile Gyroscope Motion Control Engine (Upgraded Smooth Version) ----
             const motionBtn = document.getElementById("motion-btn");
             let initialBeta = null;
             let initialGamma = null;
+            let smoothBeta = 0;
+            let smoothGamma = 0;
 
             function handleOrientation(e) {
                 if (e.beta === null || e.gamma === null) return;
@@ -1214,13 +1216,33 @@
                     initialGamma = e.gamma;
                 }
 
-                // Calculate tilt relative to starting position
-                const deltaBeta = e.beta - initialBeta;
-                const deltaGamma = e.gamma - initialGamma;
+                // Calculate tilt angle difference from starting position
+                let deltaBeta = e.beta - initialBeta;
+                let deltaGamma = e.gamma - initialGamma;
 
-                // Map tilt angles to drift (-1 to 1) for natural panning
-                driftTY = Math.max(-1, Math.min(1, deltaBeta / 25));
-                driftTX = Math.max(-1, Math.min(1, deltaGamma / 25));
+                // Handle 360 wrap-around to prevent sudden camera jumps
+                if (deltaGamma > 180) deltaGamma -= 360;
+                if (deltaGamma < -180) deltaGamma += 360;
+                if (deltaBeta > 180) deltaBeta -= 360;
+                if (deltaBeta < -180) deltaBeta += 360;
+
+                // Apply Low-Pass Exponential Filter (LERP) to eliminate sensor jitter and shaking
+                smoothBeta = lerp(smoothBeta, deltaBeta, 0.05);
+                smoothGamma = lerp(smoothGamma, deltaGamma, 0.05);
+
+                // 1. Smooth Tilt Offset (Drift)
+                driftTY = Math.max(-1, Math.min(1, smoothBeta / 35));
+                driftTX = Math.max(-1, Math.min(1, smoothGamma / 35));
+
+                // 2. Smooth Infinite Panning Velocity (Gliding through space when tilted)
+                if (!dragging) {
+                    if (Math.abs(smoothGamma) > 1.5) {
+                        velX += (smoothGamma * 0.05) * safeDragSpeed;
+                    }
+                    if (Math.abs(smoothBeta) > 1.5) {
+                        velY += (smoothBeta * 0.05) * safeDragSpeed;
+                    }
+                }
             }
 
             if (motionBtn) {
