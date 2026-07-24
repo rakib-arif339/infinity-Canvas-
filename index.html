@@ -500,7 +500,7 @@
             font-size: 22px;
             font-family: 'Courier New', Courier, monospace;
             font-weight: 600;
-            color: #ffffff; /* Matched to dark website theme */
+            color: #ffffff;
             animation: blur 3s linear infinite;
             line-height: 20px;
             transition: all 0.5s;
@@ -958,6 +958,71 @@
             background: rgba(255, 255, 255, 0.2);
             color: #fff;
         }
+
+        /* ---- From Uiverse.io by LilaRest (Adapted for Dark/Night Website Theme) ---- */ 
+        .like-button-uiverse {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 14px 16px;
+            box-shadow: rgba(0, 0, 0, 0.6) 0px -2px 6px 0px inset, 0 4px 12px rgba(0, 0, 0, 0.5);
+            background-color: #1a1a1a;
+            border-color: rgba(255, 80, 80, 0.25);
+            border-style: solid;
+            border-width: 5px;
+            border-radius: 30px;
+            transition: transform 400ms cubic-bezier(.68,-0.55,.27,2.5), 
+                        border-color 400ms ease-in-out,
+                        background-color 400ms ease-in-out;
+            cursor: pointer;
+            outline: none;
+            color: #fff;
+        }
+
+        @keyframes movingBorders {
+            0% { border-color: rgba(255, 80, 80, 0.2); }
+            50% { border-color: rgba(255, 80, 80, 0.55); }
+            90% { border-color: rgba(255, 80, 80, 0.2); }
+        }
+
+        .like-button-uiverse:hover, .like-button-uiverse.liked {
+            background-color: #222222;
+            transform: scale(1.08);
+            animation: movingBorders 3s infinite;
+        }
+
+        .like-button-uiverse .filled,
+        .like-button-uiverse .empty {
+            fill: rgb(255, 80, 80);
+            transition: opacity 100ms ease-in-out;
+        }
+
+        .like-button-uiverse .filled {
+            position: absolute;
+            opacity: 0;
+        }
+
+        @keyframes beatingHeart {
+            0% { transform: scale(1); }
+            15% { transform: scale(1.18); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.18); }
+            60% { transform: scale(1); }
+        }
+
+        .like-button-uiverse:hover .empty, .like-button-uiverse.liked .empty {
+            opacity: 0;
+        }
+
+        .like-button-uiverse:hover .filled, .like-button-uiverse.liked .filled {
+            opacity: 1;
+            animation: beatingHeart 1.2s infinite;
+        }
+
+        .like-button-uiverse.liked {
+            border-color: rgba(255, 80, 80, 0.65);
+            cursor: default;
+        }
     </style>
 </head>
 <body>
@@ -1002,7 +1067,7 @@
             <span class="admin-tooltip">Admin<br>Login</span>
         </a>
         
-        <!-- Placeholder Items for Future Sections (Triggers New Full-Screen Working Overlay Page) -->
+        <!-- Placeholder Items for Future Sections (Triggers Full-Screen Working Overlay Page) -->
         <a href="#" class="menu-item green placeholder-working-trigger"> <i class="fa fa-coffee"></i> </a>
         <a href="#" class="menu-item red placeholder-working-trigger"> <i class="fa fa-heart"></i> </a>
         <a href="#" class="menu-item purple placeholder-working-trigger"> <i class="fa fa-microphone"></i> </a>
@@ -1100,6 +1165,16 @@
     <!-- ---- Blur Carousel Lightbox Overlays ---- -->
     <div id="carousel-overlay">
         <button id="close-carousel" title="Close & Return to Canvas">&#10005;</button>
+        
+        <!-- Bottom-Left Corner Like Reaction Button Container -->
+        <div id="carousel-like-wrap" style="position: absolute; bottom: 24px; left: 24px; z-index: 110; display: flex; align-items: center; gap: 14px;">
+            <button id="carousel-like-btn" class="like-button-uiverse" title="Like this photo">
+                <svg class="empty" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28"><path fill="none" d="M0 0H24V24H0z"></path><path d="M16.5 3C19.538 3 22 5.5 22 9c0 7-7.5 11-10 12.5C9.5 20 2 16 2 9c0-3.5 2.5-6 5.5-6C9.36 3 11 4 12 5c1-1 2.64-2 4.5-2zm-3.566 15.604c.881-.556 1.676-1.109 2.42-1.701C18.335 14.533 20 11.943 20 9c0-2.36-1.537-4-3.5-4-1.076 0-2.24.57-3.086 1.414L12 7.828l-1.414-1.414C9.74 5.57 8.576 5 7.5 5 5.56 5 4 6.656 4 9c0 2.944 1.666 5.533 4.645 7.903.745.592 1.54 1.145 2.421 1.7.299.189.595.37.934.572.339-.202.635-.383.934-.571z"></path></svg>
+                <svg class="filled" height="28" width="28" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0 0H24V24H0z" fill="none"></path><path d="M16.5 3C19.538 3 22 5.5 22 9c0 7-7.5 11-10 12.5C9.5 20 2 16 2 9c0-3.5 2.5-6 5.5-6C9.36 3 11 4 12 5c1-1 2.64-2 4.5-2z"></path></svg>
+            </button>
+            <span id="carousel-like-count" style="color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 0.05em; text-shadow: 0 2px 6px rgba(0,0,0,0.9); user-select: none;">0 Likes</span>
+        </div>
+
         <div class="blur-carousel-root" data-movement="horizontal" tabindex="0" role="group" aria-roledescription="carousel">
             <div class="blur-carousel-frame" id="carouselFrame">
                 
@@ -1141,17 +1216,38 @@
             const MASTER_KEY = "$2a$10$P5WdNrwt9dVeSPAjp9dJ5.qAjmXbM/6M4ajRZOUInQJXD6zQ3tv.O";
             
             const BACKING_ASSETS = [
-                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/612d1402-0ad9-4135-3bbc-a30a6a252b00/w=800", alt: "Card 1" },
-                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/6d2ad64a-102d-4eab-0efe-31479e34b500/w=800", alt: "Card 2" },
-                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/be854dd1-37aa-4fc7-f569-fdb948109300/w=800", alt: "Card 3" },
-                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/51984031-9176-484b-f5e0-4af9a8e9ed00/w=800", alt: "Card 4" },
-                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/34ce1842-4b7a-4d52-0302-38582c341700/w=800", alt: "Card 5" },
-                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/88369c6d-00cc-4ac9-74ca-0f0965e06300/w=800", alt: "Card 6" },
-                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/aeaa0756-9647-4f6c-d900-204bd25e4a00/w=800", alt: "Card 7" },
-                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/316d1761-fd79-4ca9-b8d4-f2bb20521a00/w=800", alt: "Card 8" }
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/612d1402-0ad9-4135-3bbc-a30a6a252b00/w=800", alt: "Card 1", likes: 14 },
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/6d2ad64a-102d-4eab-0efe-31479e34b500/w=800", alt: "Card 2", likes: 8 },
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/be854dd1-37aa-4fc7-f569-fdb948109300/w=800", alt: "Card 3", likes: 21 },
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/51984031-9176-484b-f5e0-4af9a8e9ed00/w=800", alt: "Card 4", likes: 5 },
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/34ce1842-4b7a-4d52-0302-38582c341700/w=800", alt: "Card 5", likes: 32 },
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/88369c6d-00cc-4ac9-74ca-0f0965e06300/w=800", alt: "Card 6", likes: 11 },
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/aeaa0756-9647-4f6c-d900-204bd25e4a00/w=800", alt: "Card 7", likes: 19 },
+                { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/316d1761-fd79-4ca9-b8d4-f2bb20521a00/w=800", alt: "Card 8", likes: 27 }
             ];
 
             let DEFAULT_IMAGES = [...BACKING_ASSETS];
+
+            // LocalStorage Liked Photos Tracking Helpers
+            function getLikedPhotos() {
+                try {
+                    return JSON.parse(localStorage.getItem("infinity_liked_photos") || "[]");
+                } catch(e) {
+                    return [];
+                }
+            }
+
+            function isPhotoLiked(src) {
+                return getLikedPhotos().includes(src);
+            }
+
+            function markPhotoLiked(src) {
+                const liked = getLikedPhotos();
+                if (!liked.includes(src)) {
+                    liked.push(src);
+                    localStorage.setItem("infinity_liked_photos", JSON.stringify(liked));
+                }
+            }
 
             // Fetch Permanent Data & Global Password from Cloud Database
             async function loadState() {
@@ -1917,7 +2013,7 @@
                 const rawUrl = imgUrlInput.value.trim();
                 if (rawUrl) {
                     const sanitizedUrl = parseImageInputUrl(rawUrl);
-                    DEFAULT_IMAGES.push({ src: sanitizedUrl, alt: "Custom responsive layout item asset" });
+                    DEFAULT_IMAGES.push({ src: sanitizedUrl, alt: "Custom responsive layout item asset", likes: 0 });
                     saveState();
                     imgUrlInput.value = "";
                     updateAdminPanelUI();
@@ -1926,7 +2022,7 @@
                 }
             };
 
-            // ---- Converted Blur Carousel Implementation ----
+            // ---- Converted Blur Carousel & Like Reaction Implementation ----
             const overlay = document.getElementById("carousel-overlay");
             const closeBtn = document.getElementById("close-carousel");
             const contentStack = document.getElementById("carousel-content-stack");
@@ -1940,6 +2036,10 @@
             const polyPrev = document.getElementById("polyPrev");
             const polyNext = document.getElementById("polyNext");
 
+            // Like Reaction Elements
+            const likeBtn = document.getElementById("carousel-like-btn");
+            const likeCountEl = document.getElementById("carousel-like-count");
+
             let currentIndex = 0;
             const tiltDeg = 45; 
             const pressShift = 6;
@@ -1951,6 +2051,52 @@
                 polyNext.setAttribute("points", "9 18 15 12 9 6");
             }
 
+            // Updates the Like Counter and Heart state for the currently displayed photo
+            function updateLikeDisplay() {
+                if (DEFAULT_IMAGES.length === 0) return;
+                const currentImg = DEFAULT_IMAGES[currentIndex];
+                if (!currentImg) return;
+                const count = currentImg.likes || 0;
+                if (likeCountEl) {
+                    likeCountEl.textContent = `${count} ${count === 1 ? 'Like' : 'Likes'}`;
+                }
+                if (likeBtn) {
+                    // Check local storage to see if this visitor already liked this specific photo
+                    if (isPhotoLiked(currentImg.src)) {
+                        likeBtn.classList.add("liked");
+                        likeBtn.title = "You already liked this photo";
+                    } else {
+                        likeBtn.classList.remove("liked");
+                        likeBtn.title = "Like this photo";
+                    }
+                }
+            }
+
+            // Left-Bottom Corner Like Button Trigger with Anti-Spam Lock
+            if (likeBtn) {
+                likeBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    if (DEFAULT_IMAGES.length === 0) return;
+                    const currentImg = DEFAULT_IMAGES[currentIndex];
+                    
+                    // Prevent duplicate reactions if the visitor has already liked this photo
+                    if (isPhotoLiked(currentImg.src)) {
+                        return;
+                    }
+
+                    currentImg.likes = (currentImg.likes || 0) + 1;
+                    markPhotoLiked(currentImg.src);
+                    likeBtn.classList.add("liked");
+                    likeBtn.title = "You already liked this photo";
+                    
+                    if (likeCountEl) {
+                        const count = currentImg.likes;
+                        likeCountEl.textContent = `${count} ${count === 1 ? 'Like' : 'Likes'}`;
+                    }
+                    saveState(); // Automatically syncs updated likes to JSONBin Cloud Database!
+                });
+            }
+
             function updateCarousel(nextIndex) {
                 const imgs = contentStack.querySelectorAll(".carousel-img");
                 const totalSlides = imgs.length;
@@ -1959,6 +2105,7 @@
                 imgs[currentIndex]?.classList.remove("active");
                 currentIndex = ((nextIndex % totalSlides) + totalSlides) % totalSlides;
                 imgs[currentIndex]?.classList.add("active");
+                updateLikeDisplay();
             }
 
             function openCarousel(initialIndex) {
@@ -1978,6 +2125,7 @@
 
                 overlay.classList.add("active");
                 carouselFrame.style.transform = `translateY(0px) rotateX(0deg) scale(1)`;
+                updateLikeDisplay();
                 if (blurRoot && blurRoot.focus) blurRoot.focus();
             }
 
