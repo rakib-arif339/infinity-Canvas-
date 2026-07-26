@@ -1236,6 +1236,56 @@
             background: rgba(255, 255, 255, 0.2);
             color: #fff;
         }
+
+        /* ---- Viewer Count Glassmorphism Badge ---- */
+        #viewer-counter-badge {
+            position: fixed;
+            bottom: 24px;
+            left: 28px;
+            background: rgba(15, 15, 15, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 25;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            user-select: none;
+            pointer-events: auto;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #viewer-counter-badge:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .counter-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #2ed573;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #2ed573;
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 213, 115, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 213, 115, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 213, 115, 0); }
+        }
     </style>
 </head>
 <body>
@@ -1449,6 +1499,19 @@
         <div id="gallery-scene"></div>
     </div>
 
+    <!-- ---- Live & Total Viewers Counter Badge ---- -->
+    <div id="viewer-counter-badge">
+        <div class="counter-item" title="Active users currently on the website">
+            <span class="live-dot"></span>
+            <span id="live-viewers-count">1</span> Live
+        </div>
+        <div style="width: 1px; height: 14px; background: rgba(255,255,255,0.2);"></div>
+        <div class="counter-item" title="Total all-time website views">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="opacity: 0.8;"><path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0"/><path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8m8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7"/></svg>
+            <span id="total-viewers-count">...</span> Views
+        </div>
+    </div>
+
     <!-- ---- Blur Carousel Lightbox Overlays ---- -->
     <div id="carousel-overlay">
         <button id="close-carousel" title="Close & Return to Canvas">&#10005;</button>
@@ -1506,6 +1569,20 @@
 
             let DEFAULT_IMAGES = [...BACKING_ASSETS];
 
+            // ---- Live & Total Viewers Tracking State ----
+            let TOTAL_VIEWS = 0;
+            let ACTIVE_BEACONS = [];
+            const SESSION_ID = sessionStorage.getItem("infinity_session_id") || ("sess_" + Math.random().toString(36).substring(2, 11));
+            sessionStorage.setItem("infinity_session_id", SESSION_ID);
+            let HAS_INCREMENTED_VIEW = sessionStorage.getItem("infinity_view_counted") === "true";
+
+            function updateViewerCountersUI() {
+                const liveEl = document.getElementById("live-viewers-count");
+                const totalEl = document.getElementById("total-viewers-count");
+                if (liveEl) liveEl.textContent = Math.max(1, ACTIVE_BEACONS.length);
+                if (totalEl) totalEl.textContent = TOTAL_VIEWS.toLocaleString();
+            }
+
             // Fetch Permanent Data & Global Password from Cloud Database
             async function loadState() {
                 try {
@@ -1533,9 +1610,37 @@
                             Array.from(layerPools.keys()).forEach(disposeLayer);
                             project();
                         }
+
+                        // ---- Process Viewers Data & Heartbeats ----
+                        TOTAL_VIEWS = data.record.totalViews || 100;
+                        ACTIVE_BEACONS = Array.isArray(data.record.activeBeacons) ? data.record.activeBeacons : [];
+
+                        // Filter out expired sessions (older than 45 seconds)
+                        const now = Date.now();
+                        ACTIVE_BEACONS = ACTIVE_BEACONS.filter(b => (now - b.time) < 45000);
+
+                        // Add or update current visitor's active beacon
+                        const existingBeaconIndex = ACTIVE_BEACONS.findIndex(b => b.id === SESSION_ID);
+                        if (existingBeaconIndex !== -1) {
+                            ACTIVE_BEACONS[existingBeaconIndex].time = now;
+                        } else {
+                            ACTIVE_BEACONS.push({ id: SESSION_ID, time: now });
+                        }
+
+                        // Increment total view count once per browser tab session
+                        if (!HAS_INCREMENTED_VIEW) {
+                            TOTAL_VIEWS += 1;
+                            HAS_INCREMENTED_VIEW = true;
+                            sessionStorage.setItem("infinity_view_counted", "true");
+                        }
+
+                        updateViewerCountersUI();
+                        saveState(); // Sync updated stats back to cloud
                     }
                 } catch (err) {
                     console.error("Cloud load failed, using fallback:", err);
+                    TOTAL_VIEWS = Math.max(TOTAL_VIEWS, 1);
+                    updateViewerCountersUI();
                 }
             }
 
@@ -1550,7 +1655,9 @@
                         },
                         body: JSON.stringify({ 
                             password: ACCESS_PASSWORD, 
-                            images: DEFAULT_IMAGES 
+                            images: DEFAULT_IMAGES,
+                            totalViews: TOTAL_VIEWS,
+                            activeBeacons: ACTIVE_BEACONS
                         })
                     });
                 } catch (err) {
@@ -1560,6 +1667,11 @@
 
             // Load from cloud immediately when script runs
             loadState();
+
+            // Periodic Heartbeat: Sync active session every 25 seconds to keep Live count accurate
+            setInterval(() => {
+                loadState();
+            }, 25000);
 
             // ---- Dismiss Loading Interface After Delay ----
             window.addEventListener("load", () => {
