@@ -149,6 +149,17 @@
             inset: 0;
         }
 
+        /* ---- Subtle Cinematic Bokeh & Spotlight VFX Canvas Layer ---- */
+        #vfx-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+
         /* ---- Updated Hamburger Menu (35% Folded, 100% Unfolded & 100% On-Screen Visible Fan) ---- */
         .menu {
             position: fixed;
@@ -170,8 +181,8 @@
         }
 
         .menu-item {
-            background: #141414;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: transparent;
+            border: none;
             border-radius: 100%;
             width: 48px;
             height: 48px;
@@ -189,9 +200,15 @@
             text-decoration: none;
             -webkit-transform: translate3d(0, 0, 0);
             transform: translate3d(0, 0, 0);
-            -webkit-transition: -webkit-transform ease-out 200ms;
-            transition: -webkit-transform ease-out 200ms;
-            transition: transform ease-out 200ms;
+            -webkit-transition: -webkit-transform ease-out 200ms, z-index 0ms;
+            transition: -webkit-transform ease-out 200ms, z-index 0ms;
+            transition: transform ease-out 200ms, z-index 0ms;
+            z-index: 1;
+        }
+
+        /* CRITICAL MASTER LAYERING FIX: Elevate hovered/touched button above ALL adjacent buttons! */
+        .menu-item:hover, .menu-item:focus-within {
+            z-index: 99999 !important;
         }
 
         .menu-open-button {
@@ -217,6 +234,7 @@
             -webkit-transition: -webkit-transform ease-out 200ms;
             transition: -webkit-transform ease-out 200ms;
             transition: transform ease-out 200ms;
+            z-index: 100;
         }
 
         .menu-open {
@@ -268,11 +286,6 @@
             transform: translate3d(0, 0, 0) rotate(-45deg);
         }
 
-        .menu-item:hover {
-            background: #222222;
-            color: #ffffff;
-        }
-
         .menu-item:nth-child(3) { transition-duration: 180ms; }
         .menu-item:nth-child(4) { transition-duration: 180ms; }
         .menu-item:nth-child(5) { transition-duration: 180ms; }
@@ -280,15 +293,6 @@
         .menu-item:nth-child(7) { transition-duration: 180ms; }
         .menu-item:nth-child(8) { transition-duration: 180ms; }
         .menu-item:nth-child(9) { transition-duration: 180ms; }
-
-        .menu-open-button {
-            z-index: 2;
-            transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transition-duration: 400ms;
-            transform: scale(1.1, 1.1) translate3d(0, 0, 0);
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-        }
 
         .menu-open-button:hover {
             transform: scale(1.2, 1.2) translate3d(0, 0, 0);
@@ -337,47 +341,85 @@
             transform: translate3d(160px, 0px, 0);
         }
 
-        .blue, .green, .red, .purple, .orange, .lightblue {
-            background-color: #1a1a1a;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        }
-
-        .blue:hover, .green:hover, .red:hover, .purple:hover, .orange:hover, .lightblue:hover {
-            background-color: #2a2a2a;
-            color: #ffffff;
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        /* Circular Shape Tooltip for Admin Login & Send Message */
-        .admin-login-item .admin-tooltip {
+        /* ---- EXACT UIVERSE HORIZONTAL CAPSULE EFFECT (Adapted to Dark Glassmorphism Theme) ---- */
+        .menu-item .menu-pill-tooltip {
             position: absolute;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 100%;
-            background: rgba(15, 15, 15, 0.95);
+            left: 100%;
+            z-index: 1; /* Sits underneath .menu-icon-wrap (z-index: 10) but above adjacent buttons on hover */
+            height: 48px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 0 48px 48px 0;
+            background: rgba(18, 18, 18, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-left: none;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 20px;
+            padding-left: 34px;
+            margin-left: -20px; /* Tucks smoothly behind the 48px circular icon */
             color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            box-shadow: 6px 4px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .menu-item:hover .menu-pill-tooltip {
+            transform: scaleX(1);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        /* 360 Degree Icon Rotation & Theme-Matched Styling on Hover */
+        .menu-item .menu-icon-wrap {
+            position: absolute;
+            inset: 0;
+            z-index: 10; /* Sits ABOVE the sliding tooltip */
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #141414;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            font-size: 9px;
-            font-weight: 700;
-            line-height: 1.1;
-            padding: 4px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transform: scale(0.8);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            color: #FFFFFF;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s, border-color 0.3s, color 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
-        .admin-login-item:hover .admin-tooltip {
-            opacity: 1;
-            transform: scale(1);
+        .menu-item:hover .menu-icon-wrap {
+            transform: rotate(360deg);
         }
+
+        /* Accent Highlights matching each button when hovered */
+        .blue:hover .menu-icon-wrap { background: #1a2332; border-color: #60a5fa; color: #60a5fa; }
+        .blue:hover .menu-pill-tooltip { background: rgba(26, 35, 50, 0.95); border-color: rgba(96, 165, 250, 0.5); color: #60a5fa; }
+
+        .green:hover .menu-icon-wrap { background: #14281e; border-color: #4ade80; color: #4ade80; }
+        .green:hover .menu-pill-tooltip { background: rgba(20, 40, 30, 0.95); border-color: rgba(46, 213, 115, 0.5); color: #4ade80; }
+
+        .red:hover .menu-icon-wrap { background: #281419; border-color: #f87171; color: #f87171; }
+        .red:hover .menu-pill-tooltip { background: rgba(40, 20, 25, 0.95); border-color: rgba(255, 74, 74, 0.5); color: #f87171; }
+
+        .purple:hover .menu-icon-wrap { background: #23142d; border-color: #c084fc; color: #c084fc; }
+        .purple:hover .menu-pill-tooltip { background: rgba(35, 20, 45, 0.95); border-color: rgba(176, 0, 255, 0.5); color: #c084fc; }
+
+        .orange:hover .menu-icon-wrap { background: #2d1e0f; border-color: #fb923c; color: #fb923c; }
+        .orange:hover .menu-pill-tooltip { background: rgba(45, 30, 15, 0.95); border-color: rgba(255, 159, 67, 0.5); color: #fb923c; }
+
+        .lightblue:hover .menu-icon-wrap { background: #0f232d; border-color: #38bdf8; color: #38bdf8; }
+        .lightblue:hover .menu-pill-tooltip { background: rgba(15, 35, 45, 0.95); border-color: rgba(0, 243, 255, 0.5); color: #38bdf8; }
 
         /* ---- New Full-Screen "Working Page" Overlay for Non-Admin Menu Items ---- */
         #working-page-overlay {
@@ -1315,7 +1357,7 @@
         <div class="loading-text-label">Infinity Canvas Loading ...</div>
     </div>
 
-    <!-- ---- Updated Hamburger UI Switch Section Component ---- -->
+    <!-- ---- Updated Hamburger UI Switch Section Component (With Exact Uiverse Side-Sliding Tooltips) ---- -->
     <nav class="menu" id="menu-nav">
         <input type="checkbox" href="#" class="menu-open" name="menu-open" id="burger">
         <label class="menu-open-button" for="burger">
@@ -1326,21 +1368,41 @@
 
         <!-- Admin Authentication Item -->
         <a href="#" class="menu-item blue admin-login-item" id="admin-menu-trigger">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/></svg>
-            <span class="admin-tooltip">Admin<br>Login</span>
+            <span class="menu-pill-tooltip">Admin Login</span>
+            <span class="menu-icon-wrap">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/></svg>
+            </span>
         </a>
         
-        <!-- Send Message / Contact Item (Upgraded green item) -->
+        <!-- Send Message / Contact Item -->
         <a href="#" class="menu-item green admin-login-item" id="contact-menu-trigger">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"/></svg>
-            <span class="admin-tooltip">Send<br>Message</span>
+            <span class="menu-pill-tooltip">Send Message</span>
+            <span class="menu-icon-wrap">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-envelope" viewBox="0 0 16 16"><path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1zm13 2.383-4.708 2.825L15 11.105zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741M1 11.105l4.708-2.897L1 5.383z"/></svg>
+            </span>
         </a>
 
-        <!-- Placeholder Items for Future Sections (Triggers Full-Screen Working Overlay Page) -->
-        <a href="#" class="menu-item red placeholder-working-trigger"> <i class="fa fa-heart"></i> </a>
-        <a href="#" class="menu-item purple placeholder-working-trigger"> <i class="fa fa-microphone"></i> </a>
-        <a href="#" class="menu-item orange placeholder-working-trigger"> <i class="fa fa-star"></i> </a>
-        <a href="#" class="menu-item lightblue placeholder-working-trigger"> <i class="fa fa-diamond"></i> </a>
+        <!-- Reactions -->
+        <a href="#" class="menu-item red placeholder-working-trigger"> 
+            <span class="menu-pill-tooltip">Reactions</span>
+            <span class="menu-icon-wrap"><i class="fa fa-heart"></i></span> 
+        </a>
+
+        <!-- Soundscape -->
+        <a href="#" class="menu-item purple placeholder-working-trigger"> 
+            <span class="menu-pill-tooltip">Soundscape</span>
+            <span class="menu-icon-wrap"><i class="fa fa-microphone"></i></span> 
+        </a>
+        <!-- Favorites -->
+        <a href="#" class="menu-item orange placeholder-working-trigger"> 
+            <span class="menu-pill-tooltip">Favorites</span>
+            <span class="menu-icon-wrap"><i class="fa fa-star"></i></span> 
+        </a>
+        <!-- VFX Mode -->
+        <a href="#" class="menu-item lightblue placeholder-working-trigger"> 
+            <span class="menu-pill-tooltip">VFX Mode</span>
+            <span class="menu-icon-wrap"><i class="fa fa-diamond"></i></span> 
+        </a>
     </nav>
 
     <!-- ---- Gyroscope Motion Permission Button ---- -->
@@ -1496,6 +1558,8 @@
 
     <!-- ---- Infinite Viewport Container ---- -->
     <div id="gallery-container">
+        <!-- Subtle Cinematic Bokeh & Spotlight VFX Canvas Layer -->
+        <canvas id="vfx-canvas"></canvas>
         <div id="gallery-scene"></div>
     </div>
 
@@ -1755,6 +1819,7 @@
             const ro = new ResizeObserver(() => {
                 cW = container.clientWidth || cW;
                 cH = container.clientHeight || cH;
+                resizeVfxCanvas();
             });
             ro.observe(container);
 
@@ -2034,6 +2099,7 @@
                 logZoom = lerp(logZoom, targetLogZoom, 0.08);
 
                 project();
+                renderVfx(); // Render Cinematic Bokeh & Spotlight VFX each frame
                 requestAnimationFrame(loop);
             }
 
@@ -2586,6 +2652,134 @@
             closeBtn.onclick = () => {
                 overlay.classList.remove("active");
             };
+
+            // ---- Subtle Cinematic Bokeh & Spotlight VFX Engine ----
+            const vfxCanvas = document.getElementById("vfx-canvas");
+            const vfxCtx = vfxCanvas ? vfxCanvas.getContext("2d") : null;
+            const vfxParticles = [];
+            const dustColors = ["255, 255, 255", "255, 248, 220", "230, 240, 255"];
+            
+            let spotlightX = window.innerWidth / 2;
+            let spotlightY = window.innerHeight / 2;
+            let targetSpotlightX = spotlightX;
+            let targetSpotlightY = spotlightY;
+
+            function resizeVfxCanvas() {
+                if (!vfxCanvas) return;
+                const dpr = window.devicePixelRatio || 1;
+                vfxCanvas.width = cW * dpr;
+                vfxCanvas.height = cH * dpr;
+                if (vfxCtx) vfxCtx.scale(dpr, dpr);
+            }
+            resizeVfxCanvas();
+
+            // Initialize floating background bokeh dust particles
+            for (let i = 0; i < 35; i++) {
+                vfxParticles.push({
+                    type: 'dust',
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    vx: (Math.random() - 0.5) * 0.4,
+                    vy: (Math.random() - 0.5) * 0.4,
+                    size: 1 + Math.random() * 2,
+                    rgb: dustColors[Math.floor(Math.random() * dustColors.length)],
+                    alpha: 0.1 + Math.random() * 0.25
+                });
+            }
+
+            function spawnCinematicRipple(x, y) {
+                if (!vfxCtx) return;
+                vfxParticles.push({
+                    type: 'ripple',
+                    x: x,
+                    y: y,
+                    radius: 4,
+                    expansionRate: 1.5,
+                    rgb: "255, 255, 255",
+                    alpha: 0.35,
+                    decay: 0.012
+                });
+            }
+
+            if (container) {
+                container.addEventListener("pointermove", (e) => {
+                    const rect = container.getBoundingClientRect();
+                    targetSpotlightX = e.clientX - rect.left;
+                    targetSpotlightY = e.clientY - rect.top;
+
+                    // Gently push dust particles when dragging
+                    if (dragging) {
+                        for (let i = 0; i < vfxParticles.length; i++) {
+                            const p = vfxParticles[i];
+                            if (p.type === 'dust') {
+                                const dx = p.x - targetSpotlightX;
+                                const dy = p.y - targetSpotlightY;
+                                const dist = Math.hypot(dx, dy);
+                                if (dist < 100 && dist > 0) {
+                                    p.x += (dx / dist) * 1.5;
+                                    p.y += (dy / dist) * 1.5;
+                                }
+                            }
+                        }
+                    }
+                });
+
+                container.addEventListener("pointerdown", (e) => {
+                    const rect = container.getBoundingClientRect();
+                    spawnCinematicRipple(e.clientX - rect.left, e.clientY - rect.top);
+                });
+            }
+
+            function renderVfx() {
+                if (!vfxCtx || !vfxCanvas) return;
+                vfxCtx.clearRect(0, 0, cW, cH);
+
+                // 1. Render Museum Spotlight Tracking
+                spotlightX = lerp(spotlightX, targetSpotlightX, 0.08);
+                spotlightY = lerp(spotlightY, targetSpotlightY, 0.08);
+                
+                const gradient = vfxCtx.createRadialGradient(spotlightX, spotlightY, 10, spotlightX, spotlightY, 320);
+                gradient.addColorStop(0, 'rgba(255, 255, 255, 0.045)');
+                gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.015)');
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                vfxCtx.fillStyle = gradient;
+                vfxCtx.fillRect(0, 0, cW, cH);
+
+                // 2. Render Floating Ambient Bokeh & Frosted Ripples
+                for (let i = vfxParticles.length - 1; i >= 0; i--) {
+                    const p = vfxParticles[i];
+
+                    if (p.type === 'dust') {
+                        p.x += p.vx;
+                        p.y += p.vy;
+
+                        // Wrap dust around screen edges cleanly
+                        if (p.x < 0) p.x = cW;
+                        if (p.x > cW) p.x = 0;
+                        if (p.y < 0) p.y = cH;
+                        if (p.y > cH) p.y = 0;
+
+                        vfxCtx.beginPath();
+                        vfxCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        vfxCtx.fillStyle = `rgba(${p.rgb}, ${p.alpha})`;
+                        vfxCtx.fill();
+                    } else if (p.type === 'ripple') {
+                        p.radius += p.expansionRate;
+                        p.alpha -= p.decay;
+
+                        if (p.alpha <= 0) {
+                            vfxParticles.splice(i, 1);
+                            continue;
+                        }
+
+                        vfxCtx.beginPath();
+                        vfxCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        vfxCtx.strokeStyle = `rgba(${p.rgb}, ${p.alpha})`;
+                        vfxCtx.lineWidth = 1.5;
+                        vfxCtx.stroke();
+                    }
+                }
+            }
 
             requestAnimationFrame(loop);
         })();
