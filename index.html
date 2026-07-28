@@ -29,7 +29,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: opacity 0.6s ease, visibility 0.6s;
+            transition: opacity 0.6s ease, visibility 0.6s, background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         /* Loading Animation Styles */
@@ -123,6 +123,7 @@
             font-weight: 900;
             text-align: center;
             user-select: none;
+            transition: color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         /* ---- Infinite Grid Workspace Viewport ---- */
@@ -138,6 +139,7 @@
             user-select: none;
             cursor: grab;
             z-index: 1;
+            transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         #gallery-container:active {
@@ -432,7 +434,7 @@
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.4s ease, background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         #working-page-overlay.active {
@@ -593,7 +595,7 @@
             z-index: 20;
             color: #fff;
             box-shadow: 8px 0 32px rgba(0, 0, 0, 0.6);
-            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.6s ease;
             overflow-y: auto;
         }
 
@@ -1129,7 +1131,7 @@
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: opacity 0.4s ease;
+            transition: opacity 0.4s ease, background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         #carousel-overlay.active {
@@ -1162,7 +1164,7 @@
             background: #0c0c0c;
             transform-style: preserve-3d;
             transform-origin: center center;
-            transition: transform var(--transition-dur) var(--transition-ease);
+            transition: transform var(--transition-dur) var(--transition-ease), background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .carousel-img {
@@ -1175,7 +1177,7 @@
             display: block;
             opacity: 0;
             pointer-events: none;
-            transition: opacity var(--transition-dur) ease;
+            transition: opacity var(--transition-dur) ease, background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             z-index: 1;
         }
 
@@ -1299,7 +1301,7 @@
             align-items: center;
             gap: 8px;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
-            transition: background 0.2s, transform 0.2s, border-color 0.2s;
+            transition: background 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s, border-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         #share-pic-btn:hover {
@@ -1329,7 +1331,7 @@
             font-weight: 600;
             user-select: none;
             pointer-events: auto;
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            transition: opacity 0.3s ease, transform 0.3s ease, background 0.6s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         #viewer-counter-badge:hover {
@@ -1356,6 +1358,123 @@
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 213, 115, 0.7); }
             70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 213, 115, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 213, 115, 0); }
+        }
+
+        /* ---- PERFECT DAY MODE THEME OVERLAYS (Ultra-Smooth & Luxury Gallery Aesthetic) ---- */
+        body.day-mode, body.day-mode html, body.day-mode #gallery-container {
+            background-color: #ebedf2 !important;
+            color: #0f172a !important;
+        }
+
+        body.day-mode #loading-overlay {
+            background-color: #ebedf2 !important;
+        }
+        body.day-mode .loading-text-label {
+            color: #1e293b !important;
+        }
+
+        /* Smooth universal transition for theme switching */
+        body, html, #gallery-container, .menu-icon-wrap, .menu-open-button, .menu-pill-tooltip, #viewer-counter-badge, #share-pic-btn, #motion-btn, .blur-carousel-frame, .carousel-img, #side-drawer, #admin-panel, .admin-input-group input, #working-page-overlay, .lines {
+            transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, transform 0.3s ease !important;
+        }
+
+        /* Menu in Day Mode */
+        body.day-mode .menu-icon-wrap, body.day-mode .menu-open-button {
+            background: rgba(255, 255, 255, 0.88) !important;
+            border-color: rgba(255, 255, 255, 0.9) !important;
+            color: #1e293b !important;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04) !important;
+            backdrop-filter: blur(16px) !important;
+        }
+        body.day-mode .lines {
+            background: #1e293b !important;
+        }
+        body.day-mode .menu-pill-tooltip {
+            background: rgba(255, 255, 255, 0.92) !important;
+            border-color: rgba(255, 255, 255, 0.9) !important;
+            color: #0f172a !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12) !important;
+        }
+
+        /* Badges & Buttons in Day Mode */
+        body.day-mode #viewer-counter-badge, body.day-mode #share-pic-btn, body.day-mode #motion-btn {
+            background: rgba(255, 255, 255, 0.85) !important;
+            border-color: rgba(255, 255, 255, 0.9) !important;
+            color: #0f172a !important;
+            box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.05) !important;
+            backdrop-filter: blur(16px) !important;
+        }
+        body.day-mode #viewer-counter-badge div[style*="width: 1px"] {
+            background: rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Carousel in Day Mode */
+        body.day-mode #carousel-overlay {
+            background-color: rgba(235, 237, 242, 0.92) !important;
+            backdrop-filter: blur(24px) !important;
+        }
+        body.day-mode .blur-carousel-frame, body.day-mode .carousel-img {
+            background-color: #ffffff !important;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.22), 0 18px 36px -18px rgba(0, 0, 0, 0.15) !important;
+        }
+        body.day-mode .arrow-wrap {
+            color: #1e293b !important;
+            filter: drop-shadow(0 2px 6px rgba(255, 255, 255, 0.9)) !important;
+        }
+        body.day-mode #close-carousel {
+            background: rgba(0, 0, 0, 0.06) !important;
+            border-color: rgba(0, 0, 0, 0.12) !important;
+            color: #1e293b !important;
+        }
+        body.day-mode #close-carousel:hover {
+            background: rgba(0, 0, 0, 0.12) !important;
+        }
+
+        /* Side Drawer & Modals in Day Mode */
+        body.day-mode #side-drawer {
+            background: rgba(255, 255, 255, 0.92) !important;
+            border-right-color: rgba(0, 0, 0, 0.08) !important;
+            color: #1e293b !important;
+            box-shadow: 12px 0 40px rgba(0, 0, 0, 0.12) !important;
+        }
+        body.day-mode #admin-panel, body.day-mode #admin-panel h3 {
+            color: #0f172a !important;
+        }
+        body.day-mode .admin-input-group input {
+            background: rgba(0, 0, 0, 0.04) !important;
+            border-color: rgba(0, 0, 0, 0.15) !important;
+            color: #0f172a !important;
+        }
+        body.day-mode .admin-btn {
+            background: #0f172a !important;
+            color: #ffffff !important;
+        }
+        body.day-mode .admin-item {
+            background: rgba(0, 0, 0, 0.03) !important;
+        }
+        body.day-mode .admin-item span {
+            color: #475569 !important;
+        }
+
+        /* Working Overlay in Day Mode */
+        body.day-mode #working-page-overlay {
+            background-color: #ebedf2 !important;
+        }
+        body.day-mode .text-blur-loader span {
+            color: #0f172a !important;
+        }
+        body.day-mode .box-1, body.day-mode .box-2, body.day-mode .box-3 {
+            border-color: #0f172a !important;
+        }
+        body.day-mode #close-working-page, body.day-mode #close-login-slide, body.day-mode #close-contact-slide {
+            background: rgba(0, 0, 0, 0.06) !important;
+            border-color: rgba(0, 0, 0, 0.15) !important;
+            color: #1e293b !important;
+        }
+
+        /* Day Mode Image Gallery 3D Floating Shadows */
+        body.day-mode #gallery-scene div img {
+            box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.2), 0 0 1px 1px rgba(0, 0, 0, 0.04) !important;
         }
     </style>
 </head>
@@ -1417,17 +1536,20 @@
             <span class="menu-icon-wrap"><i class="fa fa-heart"></i></span> 
         </a>
 
-        <!-- Soundscape -->
-        <a href="#" class="menu-item purple placeholder-working-trigger"> 
-            <span class="menu-pill-tooltip">Soundscape</span>
-            <span class="menu-icon-wrap"><i class="fa fa-microphone"></i></span> 
+        <!-- Day / Night Mode Switcher -->
+        <a href="#" class="menu-item purple" id="day-mode-trigger"> 
+            <span class="menu-pill-tooltip" id="theme-tooltip-text">Day Mode</span>
+            <span class="menu-icon-wrap" id="theme-icon-wrap">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"/></svg>
+            </span> 
         </a>
+
         <!-- Favorites -->
         <a href="#" class="menu-item orange placeholder-working-trigger"> 
             <span class="menu-pill-tooltip">Favorites</span>
             <span class="menu-icon-wrap"><i class="fa fa-star"></i></span> 
         </a>
-        <!-- Share View Mode (Replaced VFX Mode) -->
+        <!-- Share View Mode -->
         <a href="#" class="menu-item lightblue" id="share-view-trigger"> 
             <span class="menu-pill-tooltip" id="share-tooltip-text">Share View</span>
             <span class="menu-icon-wrap">
@@ -1500,7 +1622,7 @@
                                 <div class="icon">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" height="1.2em" width="1.2em">
                                         <g style="filter: url(#shadow)">
-                                            <path fill="currentColor" d="M14.2199 21.63C13.0399 21.63 11.3699 20.8 10.0499 16.83L9.32988 14.67L7.16988 13.95C3.20988 12.63 2.37988 10.96 2.37988 9.78001C2.37988 8.61001 3.20988 6.93001 7.16988 5.60001L15.6599 2.77001C17.7799 2.06001 19.5499 2.27001 20.6399 3.35001C21.7299 4.43001 21.9399 6.21001 21.2299 8.33001L18.3999 16.82C17.0699 20.8 15.3999 21.63 14.2199 21.63ZM7.63988 7.03001C4.85988 7.96001 3.86988 9.06001 3.86988 9.78001C3.86988 10.5 4.85988 11.6 7.63988 12.52L10.1599 13.36C10.3799 13.43 10.5599 13.61 10.6299 13.83L11.4699 16.35C12.3899 19.13 13.4999 20.12 14.2199 20.12C14.9399 20.12 16.0399 19.13 16.9699 16.35L19.7999 7.86001C20.3099 6.32001 20.2199 5.06001 19.5699 4.41001C18.9199 3.76001 17.6599 3.68001 16.1299 4.19001L7.63988 7.03001Z"></path>
+                                            <path fill="currentColor" d="M14.2199 21.63C13.0399 21.63 11.3699 20.8 10.0499 16.83L9.32988 14.67L7.16988 13.95C3.20988 12.63 2.37988 10.96 2.37988 9.78001C3.86988 8.61001 3.20988 6.93001 7.16988 5.60001L15.6599 2.77001C17.7799 2.06001 19.5499 2.27001 20.6399 3.35001C21.7299 4.43001 21.9399 6.21001 21.2299 8.33001L18.3999 16.82C17.0699 20.8 15.3999 21.63 14.2199 21.63ZM7.63988 7.03001C4.85988 7.96001 3.86988 9.06001 3.86988 9.78001C3.86988 10.5 4.85988 11.6 7.63988 12.52L10.1599 13.36C10.3799 13.43 10.5599 13.61 10.6299 13.83L11.4699 16.35C12.3899 19.13 13.4999 20.12 14.2199 20.12C14.9399 20.12 16.0399 19.13 16.9699 16.35L19.7999 7.86001C20.3099 6.32001 20.2199 5.06001 19.5699 4.41001C18.9199 3.76001 17.6599 3.68001 16.1299 4.19001L7.63988 7.03001Z"></path>
                                             <path fill="currentColor" d="M10.11 14.4C9.92005 14.4 9.73005 14.33 9.58005 14.18C9.29005 13.89 9.29005 13.41 9.58005 13.12L13.16 9.53C13.45 9.24 13.93 9.24 14.22 9.53C14.51 9.82 14.51 10.3 14.22 10.59L10.64 14.18C10.5 14.33 10.3 14.4 10.11 14.4Z"></path>
                                         </g>
                                         <defs>
@@ -2007,6 +2129,7 @@
                     img.style.display = "block";
                     img.style.userSelect = "none";
                     img.style.pointerEvents = "none";
+                    img.style.transition = "box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.3s ease";
                     
                     el.appendChild(img);
                     scene.appendChild(el);
@@ -2134,6 +2257,9 @@
                 lastOctaves = nowOctaves;
             }
 
+            // Theme LERP variable for buttery canvas lighting transition
+            let currentThemeProgress = document.body.classList.contains("day-mode") ? 1 : 0;
+
             function loop() {
                 targetX += velX;
                 targetY += velY;
@@ -2152,6 +2278,10 @@
                 camX = lerp(camX, targetX + driftX, 0.12); 
                 camY = lerp(camY, targetY + driftY, 0.12); 
                 logZoom = lerp(logZoom, targetLogZoom, 0.08);
+
+                // Smoothly lerp canvas theme progress
+                const targetProgress = document.body.classList.contains("day-mode") ? 1 : 0;
+                currentThemeProgress = lerp(currentThemeProgress, targetProgress, 0.06);
 
                 project();
                 renderVfx(); // Render Cinematic Bokeh & Spotlight VFX each frame
@@ -2365,6 +2495,14 @@
                 }
             });
 
+            // ---- CRITICAL FIX: Auto-Fold Hamburger Menu when Tapping/Clicking Outside on Canvas ----
+            document.addEventListener("pointerdown", (e) => {
+                if (burgerCheckbox.checked && !menuNav.contains(e.target)) {
+                    burgerCheckbox.checked = false;
+                    menuNav.classList.remove("unfolded");
+                }
+            });
+
             adminMenuTrigger.addEventListener("click", (e) => {
                 e.preventDefault();
                 burgerCheckbox.checked = false;
@@ -2427,7 +2565,7 @@
                         shareTooltipText.style.color = "#4ade80";
                         setTimeout(() => {
                             shareTooltipText.textContent = originalText;
-                            shareTooltipText.style.color = "#fff";
+                            shareTooltipText.style.color = document.body.classList.contains("day-mode") ? "#0f172a" : "#fff";
                         }, 2000);
                     }).catch(err => {
                         console.error("Failed to copy link: ", err);
@@ -2451,12 +2589,45 @@
                         sharePicBtn.style.color = "#4ade80";
                         setTimeout(() => {
                             if (span) span.textContent = originalText;
-                            sharePicBtn.style.borderColor = "rgba(255, 255, 255, 0.2)";
-                            sharePicBtn.style.color = "#fff";
+                            sharePicBtn.style.borderColor = document.body.classList.contains("day-mode") ? "rgba(0, 0, 0, 0.15)" : "rgba(255, 255, 255, 0.2)";
+                            sharePicBtn.style.color = document.body.classList.contains("day-mode") ? "#1e293b" : "#fff";
                         }, 2000);
                     }).catch(err => {
                         console.error("Failed to copy link: ", err);
                     });
+                });
+            }
+
+            // ---- Perfect Day Mode / Theme Switcher Engine ----
+            const dayModeTrigger = document.getElementById("day-mode-trigger");
+            const themeTooltipText = document.getElementById("theme-tooltip-text");
+            const themeIconWrap = document.getElementById("theme-icon-wrap");
+
+            const sunSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"/></svg>`;
+            const moonSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.79.79 0 0 1 .61.127.8.8 0 0 1 .33.64c-.046 1.348-.68 2.623-1.839 3.593C11.956 17.098 10.059 17.5 8 17.5 3.582 17.5 0 13.918 0 9.5c0-3.518 2.274-6.52 5.518-7.554a.78.78 0 0 1 .482-.668Z"/></svg>`;
+
+            function applyTheme(isDay) {
+                if (isDay) {
+                    document.body.classList.add("day-mode");
+                    if (themeTooltipText) themeTooltipText.textContent = "Night Mode";
+                    if (themeIconWrap) themeIconWrap.innerHTML = moonSvg;
+                } else {
+                    document.body.classList.remove("day-mode");
+                    if (themeTooltipText) themeTooltipText.textContent = "Day Mode";
+                    if (themeIconWrap) themeIconWrap.innerHTML = sunSvg;
+                }
+            }
+
+            // Load saved theme preference
+            let isDayModeActive = localStorage.getItem("infinity_theme_mode") === "day";
+            applyTheme(isDayModeActive);
+
+            if (dayModeTrigger) {
+                dayModeTrigger.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    isDayModeActive = !isDayModeActive;
+                    localStorage.setItem("infinity_theme_mode", isDayModeActive ? "day" : "night");
+                    applyTheme(isDayModeActive);
                 });
             }
 
@@ -2842,14 +3013,23 @@
                 if (!vfxCtx || !vfxCanvas) return;
                 vfxCtx.clearRect(0, 0, cW, cH);
 
-                // 1. Render Museum Spotlight Tracking
+                // 1. Render Museum Spotlight Tracking (Adapts smoothly to Day Mode)
                 spotlightX = lerp(spotlightX, targetSpotlightX, 0.08);
                 spotlightY = lerp(spotlightY, targetSpotlightY, 0.08);
                 
+                const isDay = document.body.classList.contains("day-mode");
                 const gradient = vfxCtx.createRadialGradient(spotlightX, spotlightY, 10, spotlightX, spotlightY, 320);
-                gradient.addColorStop(0, 'rgba(255, 255, 255, 0.045)');
-                gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.015)');
-                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                
+                if (isDay) {
+                    gradient.addColorStop(0, 'rgba(255, 215, 0, 0.08)');
+                    gradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.02)');
+                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                } else {
+                    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.045)');
+                    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.015)');
+                    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                }
+                
                 vfxCtx.fillStyle = gradient;
                 vfxCtx.fillRect(0, 0, cW, cH);
 
@@ -2869,7 +3049,8 @@
 
                         vfxCtx.beginPath();
                         vfxCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                        vfxCtx.fillStyle = `rgba(${p.rgb}, ${p.alpha})`;
+                        let pColor = isDay ? "100, 116, 139" : p.rgb;
+                        vfxCtx.fillStyle = `rgba(${pColor}, ${p.alpha})`;
                         vfxCtx.fill();
                     } else if (p.type === 'ripple') {
                         p.radius += p.expansionRate;
@@ -2882,7 +3063,8 @@
 
                         vfxCtx.beginPath();
                         vfxCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                        vfxCtx.strokeStyle = `rgba(${p.rgb}, ${p.alpha})`;
+                        let rColor = isDay ? "30, 41, 59" : p.rgb;
+                        vfxCtx.strokeStyle = `rgba(${rColor}, ${p.alpha})`;
                         vfxCtx.lineWidth = 1.5;
                         vfxCtx.stroke();
                     }
