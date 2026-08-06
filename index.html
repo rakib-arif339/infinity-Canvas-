@@ -1800,9 +1800,20 @@
             ];
 
             let DEFAULT_IMAGES = [...BACKING_ASSETS];
-
-            // ---- Live & Total Viewers Tracking State ----
             let TOTAL_VIEWS = 0;
+
+            // ---- Load Local Storage Immediately to prevent missing data before API fetch ----
+            try {
+                const initialLocalSaved = localStorage.getItem("infinity_saved_images");
+                if (initialLocalSaved) {
+                    DEFAULT_IMAGES = JSON.parse(initialLocalSaved);
+                }
+                const initialLocalViews = localStorage.getItem("infinity_total_views");
+                if (initialLocalViews) {
+                    TOTAL_VIEWS = parseInt(initialLocalViews) || 0;
+                }
+            } catch(e) {}
+
             let ACTIVE_BEACONS = [];
             const SESSION_ID = sessionStorage.getItem("infinity_session_id") || ("sess_" + Math.random().toString(36).substring(2, 11));
             sessionStorage.setItem("infinity_session_id", SESSION_ID);
@@ -1824,27 +1835,31 @@
                             'X-Master-Key': MASTER_KEY
                         }
                     });
+                    
+                    if (!response.ok) throw new Error("Cloud API response not OK");
+
                     const data = await response.json();
                     if (data && data.record) {
-                        // Global Password Sync: Loads latest password from cloud across all devices
+                        // Global Password Sync
                         if (data.record.password) {
                             ACCESS_PASSWORD = data.record.password;
                             localStorage.setItem("infinity_admin_pass", ACCESS_PASSWORD);
                         }
-                        // Image Deck Sync
-                        if (Array.isArray(data.record.images)) {
-                            if (data.record.images.length > 0) {
-                                DEFAULT_IMAGES = data.record.images;
-                            } else {
-                                DEFAULT_IMAGES = [...BACKING_ASSETS];
-                            }
+                        
+                        // Image Deck Sync - update only if there's valid data
+                        if (Array.isArray(data.record.images) && data.record.images.length > 0) {
+                            DEFAULT_IMAGES = data.record.images;
+                            localStorage.setItem("infinity_saved_images", JSON.stringify(DEFAULT_IMAGES)); // Local backup
                             updateAdminPanelUI();
                             Array.from(layerPools.keys()).forEach(disposeLayer);
                             project();
                         }
 
                         // ---- Process Viewers Data & Heartbeats ----
-                        TOTAL_VIEWS = (typeof data.record.totalViews === 'number') ? data.record.totalViews : (TOTAL_VIEWS || 0);
+                        let cloudViews = (typeof data.record.totalViews === 'number') ? data.record.totalViews : 0;
+                        let localViews = parseInt(localStorage.getItem("infinity_total_views")) || 0;
+                        TOTAL_VIEWS = Math.max(cloudViews, localViews, TOTAL_VIEWS); // Ensure views never drop
+
                         ACTIVE_BEACONS = Array.isArray(data.record.activeBeacons) ? data.record.activeBeacons : [];
 
                         // Filter out expired sessions (older than 45 seconds)
@@ -1864,26 +1879,50 @@
                             TOTAL_VIEWS += 1;
                             HAS_INCREMENTED_VIEW = true;
                             sessionStorage.setItem("infinity_view_counted", "true");
+                            localStorage.setItem("infinity_total_views", TOTAL_VIEWS.toString()); // Local backup
                         }
 
                         updateViewerCountersUI();
                         saveState(); // Sync updated stats back to cloud
                     }
                 } catch (err) {
-                    console.error("Cloud load failed, using fallback:", err);
-                    TOTAL_VIEWS = Math.max(TOTAL_VIEWS, 1);
+                    console.error("Cloud load failed, switching to local offline fallback:", err);
+                    
+                    // Offline/Rate-limit Local Storage Fallback
+                    const localSavedImgs = localStorage.getItem("infinity_saved_images");
+                    if (localSavedImgs) {
+                        try {
+                            DEFAULT_IMAGES = JSON.parse(localSavedImgs);
+                            updateAdminPanelUI();
+                            Array.from(layerPools.keys()).forEach(disposeLayer);
+                            project();
+                        } catch(e){}
+                    }
+
+                    TOTAL_VIEWS = Math.max(TOTAL_VIEWS, parseInt(localStorage.getItem("infinity_total_views")) || 0);
+                    if (!HAS_INCREMENTED_VIEW) {
+                        TOTAL_VIEWS += 1;
+                        HAS_INCREMENTED_VIEW = true;
+                        sessionStorage.setItem("infinity_view_counted", "true");
+                        localStorage.setItem("infinity_total_views", TOTAL_VIEWS.toString());
+                    }
                     updateViewerCountersUI();
                 }
             }
 
             // Save Permanent Data & Global Password to Cloud Database
             async function saveState() {
+                // Immediate local save to prevent data loss if cloud fails
+                localStorage.setItem("infinity_saved_images", JSON.stringify(DEFAULT_IMAGES));
+                localStorage.setItem("infinity_total_views", TOTAL_VIEWS.toString());
+
                 try {
                     await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-Master-Key': MASTER_KEY
+                            'X-Master-Key': MASTER_KEY,
+                            'X-Bin-Versioning': 'false' // CRITICAL: Disables versioning to stop hitting JSONBin's 10,000 request limit
                         },
                         body: JSON.stringify({ 
                             password: ACCESS_PASSWORD, 
@@ -1893,7 +1932,7 @@
                         })
                     });
                 } catch (err) {
-                    console.error("Cloud save failed:", err);
+                    console.error("Cloud save failed (data saved locally):", err);
                 }
             }
 
