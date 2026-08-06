@@ -1855,7 +1855,7 @@
                             project();
                         }
 
-                        // ---- Process Viewers Data & Heartbeats ----
+                        // ---- Process Viewers Data ----
                         let cloudViews = (typeof data.record.totalViews === 'number') ? data.record.totalViews : 0;
                         let localViews = parseInt(localStorage.getItem("infinity_total_views")) || 0;
                         TOTAL_VIEWS = Math.max(cloudViews, localViews, TOTAL_VIEWS); // Ensure views never drop
@@ -1875,15 +1875,17 @@
                         }
 
                         // Increment total view count once per browser tab session
+                        let shouldSave = false;
                         if (!HAS_INCREMENTED_VIEW) {
                             TOTAL_VIEWS += 1;
                             HAS_INCREMENTED_VIEW = true;
                             sessionStorage.setItem("infinity_view_counted", "true");
                             localStorage.setItem("infinity_total_views", TOTAL_VIEWS.toString()); // Local backup
+                            shouldSave = true; // Only save to JSONBin if a new view was counted
                         }
 
                         updateViewerCountersUI();
-                        saveState(); // Sync updated stats back to cloud
+                        if (shouldSave) saveState(); 
                     }
                 } catch (err) {
                     console.error("Cloud load failed, switching to local offline fallback:", err);
@@ -1936,13 +1938,8 @@
                 }
             }
 
-            // Load from cloud immediately when script runs
+            // Load from cloud immediately when script runs (The 25s loop is intentionally removed to protect the cloud database)
             loadState();
-
-            // Periodic Heartbeat: Sync active session every 25 seconds to keep Live count accurate
-            setInterval(() => {
-                loadState();
-            }, 25000);
 
             // ---- Dismiss Loading Interface After Delay ----
             window.addEventListener("load", () => {
