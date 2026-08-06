@@ -668,7 +668,13 @@
             transition: opacity 0.2s;
         }
 
-        .admin-btn:hover {
+        .admin-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .admin-btn:hover:not(:disabled) {
             opacity: 0.9;
         }
 
@@ -1779,6 +1785,9 @@
             const BIN_ID = "6a5cee68f5f4af5e29a43f49";
             const MASTER_KEY = "$2a$10$P5WdNrwt9dVeSPAjp9dJ5.qAjmXbM/6M4ajRZOUInQJXD6zQ3tv.O";
             
+            // ---- Google Apps Script Web App URL for Folder Scraping ----
+            const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCCR22rgetOwpRykMdAw_rOos2cE-878tyDpHpPwoR4E-VB0-tVjU1iYowm9OdYrwN/exec";
+            
             const BACKING_ASSETS = [
                 { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/612d1402-0ad9-4135-3bbc-a30a6a252b00/w=800", alt: "Card 1" },
                 { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/6d2ad64a-102d-4eab-0efe-31479e34b500/w=800", alt: "Card 2" },
@@ -1835,7 +1844,7 @@
                         }
 
                         // ---- Process Viewers Data & Heartbeats ----
-                        TOTAL_VIEWS = data.record.totalViews || 100;
+                        TOTAL_VIEWS = (typeof data.record.totalViews === 'number') ? data.record.totalViews : (TOTAL_VIEWS || 0);
                         ACTIVE_BEACONS = Array.isArray(data.record.activeBeacons) ? data.record.activeBeacons : [];
 
                         // Filter out expired sessions (older than 45 seconds)
@@ -1917,6 +1926,9 @@
             function parseImageInputUrl(url) {
                 url = url.trim();
                 if (url.includes("drive.google.com")) {
+                    if (url.includes("/folders/")) {
+                        return url; // Preserve folder URL entirely
+                    }
                     const dMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
                     if (dMatch && dMatch[1]) {
                         return `https://lh3.googleusercontent.com/d/${dMatch[1]}`;
@@ -2120,7 +2132,10 @@
 
                     const img = document.createElement("img");
                     const srcData = DEFAULT_IMAGES[t.imgIdx];
-                    img.src = srcData ? srcData.src : "";
+                    const rawSrc = srcData ? srcData.src : "";
+                    const isFolder = rawSrc && rawSrc.includes("drive.google.com") && rawSrc.includes("/folders/");
+                    
+                    img.src = isFolder ? "https://cdn-icons-png.flaticon.com/512/2950/2950585.png" : rawSrc;
                     img.alt = srcData ? srcData.alt : "";
                     img.draggable = false;
                     img.style.width = "100%";
@@ -2143,12 +2158,20 @@
                     el.addEventListener("pointerup", (e) => {
                         const dist = Math.hypot(e.clientX - downX, e.clientY - downY);
                         if (dist < 6 && dragAccumulatorDistance <= 5) {
-                            openCarousel(t.imgIdx);
+                            if (isFolder) {
+                                window.open(rawSrc, "_blank");
+                            } else {
+                                openCarousel(t.imgIdx);
+                            }
                         }
                     });
                     el.addEventListener("click", () => {
                         if (dragAccumulatorDistance <= 5) {
-                            openCarousel(t.imgIdx);
+                            if (isFolder) {
+                                window.open(rawSrc, "_blank");
+                            } else {
+                                openCarousel(t.imgIdx);
+                            }
                         }
                     });
                     
@@ -2156,9 +2179,13 @@
                     pool.imgEls.set(key, img);
                 } else {
                     const img = pool.imgEls.get(key);
-                    if (img && DEFAULT_IMAGES[t.imgIdx]) {
-                        if (img.src !== DEFAULT_IMAGES[t.imgIdx].src) {
-                            img.src = DEFAULT_IMAGES[t.imgIdx].src;
+                    const srcData = DEFAULT_IMAGES[t.imgIdx];
+                    if (img && srcData) {
+                        const rawSrc = srcData.src;
+                        const isFolder = rawSrc && rawSrc.includes("drive.google.com") && rawSrc.includes("/folders/");
+                        const newTargetSrc = isFolder ? "https://cdn-icons-png.flaticon.com/512/2950/2950585.png" : rawSrc;
+                        if (img.src !== newTargetSrc) {
+                            img.src = newTargetSrc;
                         }
                     }
                 }
@@ -2764,7 +2791,7 @@
                 if (e.key === "Enter") savePassBtn.click();
             });
 
-            // ---- Admin Actions & List Management Tools ----
+            // ---- Admin Actions & List Management Tools (UPDATED FOR APPS SCRIPT API) ----
             const adminListContainer = document.getElementById("admin-list");
             const imgUrlInput = document.getElementById("img-url-input");
             const addImgBtn = document.getElementById("add-img-btn");
@@ -2776,7 +2803,9 @@
                     item.className = "admin-item";
 
                     const previewImg = document.createElement("img");
-                    previewImg.src = img.src;
+                    const rawSrc = img.src;
+                    const isFolder = rawSrc && rawSrc.includes("drive.google.com") && rawSrc.includes("/folders/");
+                    previewImg.src = isFolder ? "https://cdn-icons-png.flaticon.com/512/2950/2950585.png" : rawSrc;
 
                     const urlLabel = document.createElement("span");
                     urlLabel.textContent = img.src;
@@ -2799,9 +2828,48 @@
                 });
             }
 
-            addImgBtn.onclick = () => {
+            addImgBtn.onclick = async () => {
                 const rawUrl = imgUrlInput.value.trim();
-                if (rawUrl) {
+                if (!rawUrl) return;
+
+                // Check if it's a Google Drive folder URL
+                let folderIdMatch = rawUrl.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+                
+                if (folderIdMatch && folderIdMatch[1]) {
+                    // Extract folder ID and call Apps Script API
+                    const folderId = folderIdMatch[1];
+                    const originalBtnText = addImgBtn.textContent;
+                    
+                    // Show Loading State
+                    addImgBtn.textContent = "Loading...";
+                    addImgBtn.disabled = true;
+
+                    try {
+                        const response = await fetch(`${APPS_SCRIPT_URL}?folderId=${folderId}`);
+                        const data = await response.json();
+
+                        if (data.error) {
+                            alert("Error: " + data.error);
+                        } else if (Array.isArray(data) && data.length > 0) {
+                            // Append all scraped images to the main array
+                            DEFAULT_IMAGES = DEFAULT_IMAGES.concat(data);
+                            saveState();
+                            imgUrlInput.value = "";
+                            updateAdminPanelUI();
+                            Array.from(layerPools.keys()).forEach(disposeLayer);
+                            project();
+                            alert(`${data.length} images added successfully from the folder!`);
+                        } else {
+                            alert("No images found in the folder.");
+                        }
+                    } catch (error) {
+                        alert("Failed to fetch folder data. Make sure the folder link is public.");
+                    } finally {
+                        addImgBtn.textContent = originalBtnText;
+                        addImgBtn.disabled = false;
+                    }
+                } else {
+                    // Standard Single Image / Link Behavior
                     const sanitizedUrl = parseImageInputUrl(rawUrl);
                     DEFAULT_IMAGES.push({ src: sanitizedUrl, alt: "Custom responsive layout item asset" });
                     saveState();
@@ -2854,11 +2922,21 @@
                 contentStack.innerHTML = "";
                 
                 DEFAULT_IMAGES.forEach((imgData, idx) => {
+                    const rawSrc = imgData.src;
+                    const isFolder = rawSrc && rawSrc.includes("drive.google.com") && rawSrc.includes("/folders/");
+                    
                     const img = document.createElement("img");
                     img.className = "carousel-img" + (idx === currentIndex ? " active" : "");
-                    img.src = imgData.src;
+                    img.src = isFolder ? "https://cdn-icons-png.flaticon.com/512/2950/2950585.png" : rawSrc;
                     img.alt = imgData.alt;
                     img.draggable = false;
+                    
+                    if (isFolder) {
+                        img.style.cursor = "pointer";
+                        img.title = "Click to open folder";
+                        img.onclick = () => window.open(rawSrc, "_blank");
+                    }
+                    
                     contentStack.appendChild(img);
                 });
 
